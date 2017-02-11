@@ -6,7 +6,7 @@
     "jest": "18.1.0",
     "ts-jest": "18.0.3",
     "tslib": "1.5.0",
-    "typescript": "2.1.5"
+    "typescript": "2.1.6"
   },
   "jest": {
     "transform": {
