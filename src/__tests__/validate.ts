@@ -1,4 +1,8 @@
 import {
+    GraphCycleError,
+} from '../dependency-graph';
+
+import {
     ValidationAggregateError,
     validate,
     ValidationError,
@@ -214,25 +218,109 @@ test('a non validation error thrown is not wrapped in ValidationAggregateError',
     expect(failed).toBe(true);
 });
 
+
+test('async values is resolved before passed as dependency value', async () => {
+    let executed = false;
+
+    await validate(
+        {
+            field1: new Promise((resolve, reject) => {
+                setTimeout(() => resolve('test1'), 100);
+            }),
+            field2: 'test2',
+        },
+        {
+            field2: {
+                dependencies: [
+                    'field1',
+                ],
+                validators: [
+                    async (value, dependencies) => {
+                        executed = true;
+                        expect(dependencies.get('field1')).toEqual('test1');
+                    },
+                ],
+            }
+        }
+    );
+
+    expect(executed).toBe(true);
+});
+
 test('dependencies is passed to the validator', async () => {
     let executed = false;
     
     await validate(
         {
             field1: 'test1',
-            field2: 'test2'
+            field2: 'test2',
         },
-        {field2: {
-            dependencies: ['field1'],
-            validators: [
-                async (value, dependencies) => {
-                    executed = true;
-                    expect(dependencies['field1']).toEqual('test1');
-                }
-            ]
-        }}
+        {
+            field2: {
+                dependencies: [
+                    'field1',
+                ],
+                validators: [
+                    async (value, dependencies) => {
+                        executed = true;
+                        expect(dependencies.get('field1')).toEqual('test1');
+                    },
+                ],
+            },
+        },
     );
 
     expect(executed).toBe(true);
-    
+});
+
+test('async values are resolved before passed to validators', async () => {
+    let executed = false;
+
+    await validate(
+        {
+            field1: new Promise((resolve, reject) => {
+                setTimeout(() => resolve('test1'), 100);
+            }),
+        },
+        {
+            field1: {
+                validators: [
+                    async (value) => {
+                        executed = true;
+                        expect(value).toEqual('test1');
+                    },
+                ]
+            }
+        }
+    );
+
+    expect(executed).toBe(true);
+});
+
+test('creating a cycle in depencies throws', async () => {
+    let failed = false;
+    try {
+        await validate(
+            {
+                a: 'A',
+                b: 'B',
+                c: 'C',
+            },{
+                a: {
+                    dependencies: ['c'],
+                },
+                b: {
+                    dependencies: ['a'],
+                },
+                c: {
+                    dependencies: ['b'],
+                },
+            }
+        );
+    } catch (e) {
+        failed = true;
+        expect(e).toBeInstanceOf(GraphCycleError);
+        expect(e.cycle).toEqual(['a', 'b', 'c', 'a']);
+    }
+    expect(failed).toBe(true);
 });

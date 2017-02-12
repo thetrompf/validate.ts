@@ -1,15 +1,20 @@
+import {
+    Graph,
+} from './dependency-graph';
+
 /**
  * The interface for field values to validate.
  */
-export interface FieldValuesObject extends Object {
+export interface FieldValuesObject {
     [key: string]: any;
 }
 
 /**
  * The interface of a validator function.
  */
-export type Validator = (value: any, dependencies?: {[field:string]: any}, options?: any) => Promise<void>;
-
+export interface Validator {
+    (value: any, dependencies?: Map<string, any> | undefined, options?: any): Promise<void>;
+}
 /**
  * The interface/options for constraints.
  */
@@ -53,9 +58,9 @@ export class ValidationTimeoutError extends ValidationError {
  * The aggregated error to be thrown to the caller.
  */
 export class ValidationAggregateError extends ValidationError {
-    
+
     private _errors: Map<string, ValidationError[]>;
-    
+
     public constructor() {
         super();
         this._errors = new Map();
@@ -136,6 +141,42 @@ export const validationTimeout = () : Promise<void> => {
     });
 }
 
+function addConstraints<K, V>(graph: Graph<K, V> , node: K, dependencies: Set<K> | undefined): void {
+    if(dependencies == null) {
+        return;
+    }
+    dependencies.forEach(d => graph.addDependency(d, node));
+}
+
+function addAllConstraints<K, V>(graph: Graph<K, V>, nodes: K[], dependencyMap: Map<K, Set<K>>): void {
+    nodes.forEach(n => addConstraints(graph, n, dependencyMap.get(n) as Set<K>))
+}
+
+async function getPromisedDependencyMap(values: FieldValuesObject, dependencies: Set<string> | undefined): Promise<Map<string, any> | undefined> {
+    if(dependencies == null) {
+        return undefined;
+    }
+
+    const map = new Map<string, any>();
+    const promises: Promise<any>[] = [];
+
+    for(const key of dependencies) {
+        const value = values[key];
+        if(value != null) {
+            if(value instanceof Promise) {
+                promises.push(value.then((v) => map.set(key, v)));
+            } else {
+                map.set(key, value);
+            }
+        } else {
+            map.set(key, undefined);
+        }
+    }
+
+    await Promise.all(promises);
+    return map;
+}
+
 /**
  * Validate `values` against the `constraints` specification.
  * 
@@ -150,31 +191,74 @@ export const validate = async <T extends FieldValuesObject>(values: T, constrain
     const keys = Object.keys(values);
     const errors = new ValidationAggregateError();
     const promises: Promise<any>[] = [];
+
+    // Create dependency graph.
+    const graph = new Graph<string, ConstraintSpecification | undefined>();
+
+    // Add all nodes.
+    keys.forEach(k => graph.addNode(k, constraints[k]));
     
-    for(const key of keys) {
+    // Map all constraints with dependencies,
+    // in order for easier building the graph,
+    // and resolve the asynchronous dependencies later on.
+    const dependencyMap = new Map<string, Set<string>>();
+    for(const key in constraints) {
+        const nodeConstraints = constraints[key];
+        if(nodeConstraints && nodeConstraints.dependencies != null) {
+            dependencyMap.set(key, new Set(nodeConstraints.dependencies));
+        }
+    }
+    addAllConstraints(graph, keys, dependencyMap);
+
+    for(const key of graph.overallOrder()) {
         const constraint = constraints[key];
         if(constraint != undefined) {
-            const value = values[key];
-            if(isEmpty(value)) {
-                if(constraint.required) {
-                    errors.add(key, new ValidationError('Cannot be blank'));
-
-                }
-            } else if(constraint.validators) {
-                const dependencies = constraint.dependencies ?  {} : undefined;
-                constraint.validators.forEach((validator: Validator) => {
-                    promises.push(Promise.race([
-                        validationTimeout(),
-                        validator(value),
-                    ]).catch((e) => {
-                        if(e instanceof ValidationError) {
-                            errors.add(key, e);
-                            return;
-                        }
-                        throw e;
-                    }));
-                });
+            let value = values[key];
+            if(!(value instanceof Promise)) {
+                value = Promise.resolve(value);
             }
+            promises.push(Promise.race([
+                validationTimeout(),
+                value,
+            ]).then((value: any) => {
+                if(isEmpty(value)) {
+                    if(constraint.required) {
+                        errors.add(key, new ValidationError('Cannot be blank'));
+                        return;
+                    }
+                } else if(constraint.validators) {
+                    const dependencies = dependencyMap.get(key);
+                    return Promise.all(constraint.validators.map((validator: Validator) => {
+                        return Promise.race([
+                            validationTimeout(),
+                            getPromisedDependencyMap(values, dependencies),
+                        ]).then((deps: Map<string, any> | undefined) => {
+                            return Promise.race([
+                                validationTimeout(),
+                                validator(value, deps).catch(e => {
+                                    if(e instanceof ValidationError) {
+                                        errors.add(key, e);
+                                        return;
+                                    }
+                                    throw e;
+                                }),
+                            ]);
+                        });
+                    }));
+                }
+            }, (e) => {
+                if(e instanceof ValidationError) {
+                    errors.add(key, e);
+                    return;
+                }
+                throw e;
+            }).catch(e => {
+                if(e instanceof ValidationError) {
+                    errors.add(key, e);
+                    return;
+                }
+                throw e;
+            }));
         }
     }
 
