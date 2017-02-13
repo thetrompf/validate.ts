@@ -20,6 +20,15 @@
             "check-open-brace",
             "check-whitespace"
         ],
+        "member-access": [
+            true
+        ],
+        "member-ordering": [
+            true
+        ],
+        "ordered-imports": [
+            true
+        ],
         "quotemark": [
             true,
             "single",

@@ -3,11 +3,11 @@ import {
 } from '../dependency-graph';
 
 import {
-    ValidationAggregateError,
     validate,
+    VALIDATION_TIMEOUT,
+    ValidationAggregateError,
     ValidationError,
     ValidationTimeoutError,
-    VALIDATION_TIMEOUT,
 } from '../validate';
 
 test('simple call to public interface with empty value and empty constraints', async () => {
