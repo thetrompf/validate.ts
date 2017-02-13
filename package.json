@@ -20,12 +20,13 @@
         ]
     },
     "license": "BSD-3-Clause",
-    "main": "build/index.js",
+    "main": "lib/index.js",
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
     "scripts": {
-        "test": "jest",
-        "lint": "tslint ."
+        "build": "tsc -p .",
+        "lint": "tslint .",
+        "test": "jest"
     },
     "version": "0.0.1"
 }
