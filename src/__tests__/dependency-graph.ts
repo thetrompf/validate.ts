@@ -87,7 +87,7 @@ test('adding dependency adds incoming and outgoing edges', () => {
     expect(node1OutgoingEdges.size).toEqual(1);
     expect(node2IncomingEdges.size).toEqual(1);
     expect(node2OutgoingEdges.size).toEqual(0);
-    
+
     expect(node1OutgoingEdges.has(node2)).toBe(true);
     expect(node2IncomingEdges.has(node1)).toBe(true);
 });
@@ -125,7 +125,7 @@ test('adding a dependency that already exists is a no-op', () => {
 
     expect(node1OutgoingEdges.size).toEqual(1);
     expect(node2IncomingEdges.size).toEqual(1);
-    
+
     graph.addDependency(node1, node2);
 
     expect(node1OutgoingEdges.size).toEqual(1);
@@ -139,7 +139,7 @@ test('removing a dependency removes incoming and outgoing edges', () => {
 
     graph.addNode(node1, 1);
     graph.addNode(node2, 2);
-    
+
     const node1OutgoingEdges = graph.getOutgoingEdges().get(node1) as Set<string>;
     const node2IncomingEdges = graph.getIncomingEdges().get(node2) as Set<string>;
 
@@ -166,7 +166,7 @@ test('removing a dependency that does not exist does not throw', () => {
     graph.addDependency(node2, node1);
 
     const nodes = graph.getNodes();
-    
+
     const outgoingEdges = graph.getOutgoingEdges().get(node1);
     const incomingEdges = graph.getIncomingEdges().get(node2);
 
@@ -227,21 +227,15 @@ test('dependenciesOf returns the sub tree of the node in question', () => {
 
     expect(
         Array.from(graph.dependenciesOf(a, false)).sort()
-    ).toEqual(
-        [b, c, d, e, f, g]
-    );
+    ).toEqual([b, c, d, e, f, g]);
 
     expect(
         Array.from(graph.dependenciesOf(b, false)).sort()
-    ).toEqual(
-        [d, e]
-    );
+    ).toEqual([d, e]);
 
     expect(
         Array.from(graph.dependenciesOf(c, false)).sort()
-    ).toEqual(
-        [f, g]
-    );
+    ).toEqual([f, g]);
 });
 
 test('dependantsOf returns all nodes that are depending on the node itself', () => {
@@ -420,5 +414,5 @@ test('overallOrder returns a legal execution path for graphs with disconnected s
 
     expect(
         Array.from(graph.overallOrder())
-    ).toEqual([f,b,c,a,e,h,d,g,m,l,k,i,j]);
+    ).toEqual([f, b, c, a, e, h, d, g, m, l, k, i, j]);
 });

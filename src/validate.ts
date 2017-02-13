@@ -19,17 +19,17 @@ export interface Validator {
  * The interface/options for constraints.
  */
 export interface ConstraintSpecification {
-    
-    /** 
+
+    /**
      * A list of identifiers to depend on.
      */
     dependencies?: string[];
-    
+
     /**
      * Mark that the field must have a non-empty value
      */
     required?: boolean;
-    
+
     /**
      * A list of validators to run against the field value
      */
@@ -37,6 +37,7 @@ export interface ConstraintSpecification {
 }
 
 export type Constraints<T> = {
+    // tslint:disable-next-line:semicolon
     [P in keyof T]?: ConstraintSpecification;
 };
 
@@ -84,7 +85,7 @@ export class ValidationAggregateError extends ValidationError {
      * Add a validation error to `field`.
      */
     public add(field: string, error: ValidationError): void {
-        if(this._errors.has(field)) {
+        if (this._errors.has(field)) {
             const errors = this._errors.get(field) as ValidationError[];
             errors.push(error);
         } else {
@@ -98,11 +99,11 @@ export class ValidationAggregateError extends ValidationError {
     public toString(): string {
         let result = `
 Validation errors:`;
-        
+
         this._errors.forEach((errors, key) => {
             result += `
   - ${key}:
-    ${errors.map(e => '* '+e.message)}`
+    ${errors.map(e => '* ' + e.message)}`;
         });
         return result;
     }
@@ -112,7 +113,7 @@ Validation errors:`;
  * Utility function used to determine if a field has an empty value.
  */
 export const isEmpty = (value: any): boolean => {
-    switch(true) {
+    switch (true) {
         case (value == null):
             return true;
         case (typeof value === 'string' && value.trim().length === 0):
@@ -133,7 +134,7 @@ export const VALIDATION_TIMEOUT = 2000;
  * Function that returns a promise that rejects
  * after the `VALIDATION_TIMEOUT` has exceeded.
  */
-export const validationTimeout = () : Promise<void> => {
+export function validationTimeout(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         setTimeout(() => {
             reject(new ValidationTimeoutError('Validation timeout'));
@@ -141,29 +142,29 @@ export const validationTimeout = () : Promise<void> => {
     });
 }
 
-function addConstraints<K, V>(graph: Graph<K, V> , node: K, dependencies: Set<K> | undefined): void {
-    if(dependencies == null) {
+function addConstraints<K, V>(graph: Graph<K, V>, node: K, dependencies: Set<K> | undefined): void {
+    if (dependencies == null) {
         return;
     }
     dependencies.forEach(d => graph.addDependency(d, node));
 }
 
 function addAllConstraints<K, V>(graph: Graph<K, V>, nodes: K[], dependencyMap: Map<K, Set<K>>): void {
-    nodes.forEach(n => addConstraints(graph, n, dependencyMap.get(n) as Set<K>))
+    nodes.forEach(n => addConstraints(graph, n, dependencyMap.get(n) as Set<K>));
 }
 
 async function getPromisedDependencyMap(values: FieldValuesObject, dependencies: Set<string> | undefined): Promise<Map<string, any> | undefined> {
-    if(dependencies == null) {
+    if (dependencies == null) {
         return undefined;
     }
 
     const map = new Map<string, any>();
     const promises: Promise<any>[] = [];
 
-    for(const key of dependencies) {
+    for (const key of dependencies) {
         const value = values[key];
-        if(value != null) {
-            if(value instanceof Promise) {
+        if (value != null) {
+            if (value instanceof Promise) {
                 promises.push(value.then((v) => map.set(key, v)));
             } else {
                 map.set(key, value);
@@ -179,15 +180,15 @@ async function getPromisedDependencyMap(values: FieldValuesObject, dependencies:
 
 /**
  * Validate `values` against the `constraints` specification.
- * 
+ *
  * If one or more values don't comply with the `constraints`,
  * an `AggregateError` is thrown containing the all the `ValidationError`s
  * in the validation process.
- * 
+ *
  * If a single validator exceeds the `VALIDATION_TIMEOUT`
  * a `ValidationTimeoutError` is thrown.
  */
-export const validate = async <T extends FieldValuesObject>(values: T, constraints: Constraints<T>) : Promise<void> => {
+export const validate = async <T extends FieldValuesObject>(values: T, constraints: Constraints<T>): Promise<void> => {
     const keys = Object.keys(values);
     const errors = new ValidationAggregateError();
     const promises: Promise<any>[] = [];
@@ -197,76 +198,72 @@ export const validate = async <T extends FieldValuesObject>(values: T, constrain
 
     // Add all nodes.
     keys.forEach(k => graph.addNode(k, constraints[k]));
-    
+
     // Map all constraints with dependencies,
     // in order for easier building the graph,
     // and resolve the asynchronous dependencies later on.
     const dependencyMap = new Map<string, Set<string>>();
-    for(const key in constraints) {
+    for (const key in constraints) {
         const nodeConstraints = constraints[key];
-        if(nodeConstraints && nodeConstraints.dependencies != null) {
+        if (nodeConstraints && nodeConstraints.dependencies != null) {
             dependencyMap.set(key, new Set(nodeConstraints.dependencies));
         }
     }
+
     addAllConstraints(graph, keys, dependencyMap);
 
-    for(const key of graph.overallOrder()) {
+    const handleValidationErrors = (key: string) => (e: any) => {
+        if (e instanceof ValidationError) {
+            errors.add(key, e);
+            return;
+        }
+        throw e;
+    };
+
+    for (const key of graph.overallOrder()) {
+        const keyValidationErrorsHandler = handleValidationErrors(key);
         const constraint = constraints[key];
-        if(constraint != undefined) {
+        if (constraint != undefined) {
             let value = values[key];
-            if(!(value instanceof Promise)) {
+            if (!(value instanceof Promise)) {
                 value = Promise.resolve(value);
             }
-            promises.push(Promise.race([
-                validationTimeout(),
-                value,
-            ]).then((value: any) => {
-                if(isEmpty(value)) {
-                    if(constraint.required) {
-                        errors.add(key, new ValidationError('Cannot be blank'));
-                        return;
-                    }
-                } else if(constraint.validators) {
-                    const dependencies = dependencyMap.get(key);
-                    return Promise.all(constraint.validators.map((validator: Validator) => {
-                        return Promise.race([
-                            validationTimeout(),
-                            getPromisedDependencyMap(values, dependencies),
-                        ]).then((deps: Map<string, any> | undefined) => {
+            promises.push(
+                Promise.race([
+                    validationTimeout(),
+                    value,
+                ]).then((value: any) => {
+                    if (isEmpty(value)) {
+                        if (constraint.required) {
+                            errors.add(key, new ValidationError('Cannot be blank'));
+                            return;
+                        }
+                    } else if (constraint.validators) {
+                        const dependencies = dependencyMap.get(key);
+                        return Promise.all(constraint.validators.map((validator: Validator) => {
                             return Promise.race([
                                 validationTimeout(),
-                                validator(value, deps).catch(e => {
-                                    if(e instanceof ValidationError) {
-                                        errors.add(key, e);
-                                        return;
-                                    }
-                                    throw e;
-                                }),
-                            ]);
-                        });
-                    }));
-                }
-            }, (e) => {
-                if(e instanceof ValidationError) {
-                    errors.add(key, e);
-                    return;
-                }
-                throw e;
-            }).catch(e => {
-                if(e instanceof ValidationError) {
-                    errors.add(key, e);
-                    return;
-                }
-                throw e;
-            }));
+                                getPromisedDependencyMap(values, dependencies),
+                            ]).then((deps: Map<string, any> | undefined) => {
+                                return Promise.race([
+                                    validationTimeout(),
+                                    validator(value, deps)
+                                        .catch(keyValidationErrorsHandler),
+                                ]);
+                            });
+                        }));
+                    }
+                }, keyValidationErrorsHandler)
+                    .catch(keyValidationErrorsHandler)
+            );
         }
     }
 
     await Promise.all(promises);
 
-    if(errors.length > 0) {
+    if (errors.length > 0) {
         throw errors;
     }
-    
+
     return;
 };

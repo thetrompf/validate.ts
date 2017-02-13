@@ -17,10 +17,12 @@ test('simple call to public interface with empty value and empty constraints', a
 
 test('a required field filled out passes', async () => {
     const result = await validate(
-        {field: 'has-value'},
-        {field: {
-            required: true,
-        }}
+        { field: 'has-value' },
+        {
+            field: {
+                required: true,
+            }
+        }
     );
     expect(result).toBeUndefined();
 });
@@ -30,10 +32,12 @@ test('a required field fails when it is null', async () => {
 
     try {
         await validate(
-            {field: null},
-            {field: {
-                required: true
-            }}
+            { field: null },
+            {
+                field: {
+                    required: true
+                }
+            }
         );
     } catch (e) {
         failed = true;
@@ -49,12 +53,14 @@ test('a required field fails when it is an empty string', async () => {
 
     try {
         await validate(
-            {field: ''},
-            {field: {
-                required: true
-            }}
+            { field: '' },
+            {
+                field: {
+                    required: true
+                }
+            }
         );
-    } catch(e) {
+    } catch (e) {
         failed = true;
         expect(e).toBeInstanceOf(ValidationAggregateError);
         expect(e.length).toEqual(1);
@@ -68,12 +74,14 @@ test('a required field only contains whitespace fails', async () => {
 
     try {
         await validate(
-            {field: '    '},
-            {field: {
-                required: true
-            }}
+            { field: '    ' },
+            {
+                field: {
+                    required: true
+                }
+            }
         );
-    } catch(e) {
+    } catch (e) {
         failed = true;
         expect(e).toBeInstanceOf(ValidationAggregateError);
         expect(e.length).toEqual(1);
@@ -87,18 +95,20 @@ test('a field that fails a simple validator throws', async () => {
 
     try {
         await validate(
-            {field: '23'},
-            {field: {
-                validators: [
-                    async (value: any) => {
-                        if(typeof value !== 'number') {
-                            throw new ValidationError('Must be a number');
+            { field: '23' },
+            {
+                field: {
+                    validators: [
+                        async (value: any) => {
+                            if (typeof value !== 'number') {
+                                throw new ValidationError('Must be a number');
+                            }
                         }
-                    }
-                ]
-            }}
+                    ]
+                }
+            }
         );
-    } catch(e) {
+    } catch (e) {
         failed = true;
         expect(e).toBeInstanceOf(ValidationAggregateError);
         expect(e.length).toEqual(1);
@@ -112,15 +122,17 @@ test('a single field with multiple failing validators', async () => {
 
     try {
         await validate(
-            {field: 23},
-            {field: {
-                validators: [
-                    async (value: any) => {throw new ValidationError('fail 1');},
-                    async (value: any) => {throw new ValidationError('fail 2');},
-                ]
-            }}
+            { field: 23 },
+            {
+                field: {
+                    validators: [
+                        async (value: any) => { throw new ValidationError('fail 1'); },
+                        async (value: any) => { throw new ValidationError('fail 2'); },
+                    ]
+                }
+            }
         );
-    } catch(e) {
+    } catch (e) {
         failed = true;
         expect(e).toBeInstanceOf(ValidationAggregateError);
         const aggError = e as ValidationAggregateError;
@@ -135,12 +147,14 @@ test('a single field with multiple failing validators', async () => {
 
 test('validators of a field are not called when its value is empty', async () => {
     const result = await validate(
-        {field: null},
-        {field: {
-            validators: [
-                async (value: any) => {throw new ValidationError('fail');}
-            ]
-        }}
+        { field: null },
+        {
+            field: {
+                validators: [
+                    async (value: any) => { throw new ValidationError('fail'); }
+                ]
+            }
+        }
     );
     expect(result).toBeUndefined();
 });
@@ -150,15 +164,17 @@ test('validators of a required field is called when field is empty', async () =>
 
     try {
         await validate(
-            {field: null},
-            {field: {
-                required: true,
-                validators: [
-                    async (value: any) => {throw new ValidationError('fail');}
-                ]
-            }}
+            { field: null },
+            {
+                field: {
+                    required: true,
+                    validators: [
+                        async (value: any) => { throw new ValidationError('fail'); }
+                    ]
+                }
+            }
         );
-    } catch(e) {
+    } catch (e) {
         failed = true;
         expect(e).toBeInstanceOf(ValidationAggregateError);
         const aggError = e as ValidationAggregateError;
@@ -173,16 +189,18 @@ test('a validator that exceeds timeout throws', async () => {
 
     try {
         await validate(
-            {field: 'value'},
-            {field: {
-                validators: [
-                    async (value: any) => {
-                        return new Promise<void>((resolve, reject) => {
-                            setTimeout(resolve, VALIDATION_TIMEOUT+1000);
-                        });
-                    }
-                ]
-            }}
+            { field: 'value' },
+            {
+                field: {
+                    validators: [
+                        async (value: any) => {
+                            return new Promise<void>((resolve, reject) => {
+                                setTimeout(resolve, VALIDATION_TIMEOUT + 1000);
+                            });
+                        }
+                    ]
+                }
+            }
         );
     } catch (e) {
         failed = true;
@@ -200,14 +218,16 @@ test('a non validation error thrown is not wrapped in ValidationAggregateError',
 
     try {
         await validate(
-            {field: 'value'},
-            {field: {
-                validators: [
-                    async (value) => { throw new Error('A non validation error'); }
-                ]
-            }}
-        )
-    } catch(e) {
+            { field: 'value' },
+            {
+                field: {
+                    validators: [
+                        async (value) => { throw new Error('A non validation error'); }
+                    ]
+                }
+            }
+        );
+    } catch (e) {
         failed = true;
         expect(e).not.toBeInstanceOf(ValidationAggregateError);
         expect(e).toBeInstanceOf(Error);
@@ -249,7 +269,7 @@ test('async values is resolved before passed as dependency value', async () => {
 
 test('dependencies is passed to the validator', async () => {
     let executed = false;
-    
+
     await validate(
         {
             field1: 'test1',
@@ -305,7 +325,7 @@ test('creating a cycle in depencies throws', async () => {
                 a: 'A',
                 b: 'B',
                 c: 'C',
-            },{
+            }, {
                 a: {
                     dependencies: ['c'],
                 },

@@ -44,18 +44,18 @@ function createDfs<K>(edges: Map<K, Set<K>>, leavesOnly: boolean, result: Set<K>
         if (currentEdges == null) {
             throw new NoSuchEdgesGraphError(currentNode);
         }
-        
+
         currentEdges.forEach((node) => {
             if (!visited.has(node)) {
                 dfs(node);
-            } else if(stack.indexOf(node) > -1) {
+            } else if (stack.indexOf(node) > -1) {
                 stack.push(node);
                 throw new GraphCycleError(stack);
             }
         });
 
         stack.pop();
-        
+
         if ((!leavesOnly || currentEdges.size === 0) && !result.has(currentNode)) {
             result.add(currentNode);
         }
@@ -82,7 +82,7 @@ export class Graph<K, V> {
     public addNode(node: K, data: V): void {
         if (!this.nodes.has(node)) {
             this.nodes.set(node, data);
-            
+
             this.incomingEdges.set(node, new Set);
             this.outgoingEdges.set(node, new Set);
         }
@@ -138,10 +138,10 @@ export class Graph<K, V> {
         if (this.nodes.has(node)) {
             const result = new Set<K>();
             const dfs = createDfs(this.outgoingEdges, leavesOnly, result);
-            
+
             dfs(node);
             result.delete(node);
-            
+
             return result;
         } else {
             throw new NoSuchNodeGraphError(node);
@@ -152,10 +152,10 @@ export class Graph<K, V> {
         if (this.nodes.has(node)) {
             const result = new Set<K>();
             const dfs = createDfs(this.incomingEdges, leavesOnly, result);
-            
+
             dfs(node);
             result.delete(node);
-            
+
             return result;
         } else {
             throw new NoSuchNodeGraphError(node);
