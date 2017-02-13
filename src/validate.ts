@@ -56,6 +56,14 @@ export class ValidationTimeoutError extends ValidationError {
 }
 
 /**
+ * This error is added to the `ValidationAggregateError`
+ * when the special `required` constraint is violated.
+ */
+export class RequiredValidationError extends ValidationError {
+
+}
+
+/**
  * The aggregated error to be thrown to the caller.
  */
 export class ValidationAggregateError extends ValidationError {
@@ -142,6 +150,11 @@ export function validationTimeout(): Promise<void> {
     });
 }
 
+/**
+ * Add `dependencies` as outgoing edges from `node` in the `graph`.
+ *
+ * If `dependencies` are `undefined` this function is a no-op.
+ */
 function addConstraints<K, V>(graph: Graph<K, V>, node: K, dependencies: Set<K> | undefined): void {
     if (dependencies == null) {
         return;
@@ -149,10 +162,20 @@ function addConstraints<K, V>(graph: Graph<K, V>, node: K, dependencies: Set<K> 
     dependencies.forEach(d => graph.addDependency(d, node));
 }
 
+/**
+ * Add all the constraints from the `dependencyMap` to the `nodes` in the `graph`.
+ */
 function addAllConstraints<K, V>(graph: Graph<K, V>, nodes: K[], dependencyMap: Map<K, Set<K>>): void {
-    nodes.forEach(n => addConstraints(graph, n, dependencyMap.get(n) as Set<K>));
+    nodes.forEach(n => addConstraints(graph, n, dependencyMap.get(n)));
 }
 
+/**
+ * Return a map with all the values of the `dependencies` resolved,
+ * so they can be accessed synchronously afterwards,
+ * e.g. when passed to validators.
+ *
+ * If `dependencies` are not provieded the return value is `undefined`.
+ */
 async function getPromisedDependencyMap(values: FieldValuesObject, dependencies: Set<string> | undefined): Promise<Map<string, any> | undefined> {
     if (dependencies == null) {
         return undefined;
@@ -220,47 +243,84 @@ export const validate = async <T extends FieldValuesObject>(values: T, constrain
         throw e;
     };
 
+    // Loop through the dependency graph in a resolved execution path.
     for (const key of graph.overallOrder()) {
-        const keyValidationErrorsHandler = handleValidationErrors(key);
+
         const constraint = constraints[key];
         if (constraint != undefined) {
+            // Create error handler for this `key`.
+            const keyValidationErrorsHandler = handleValidationErrors(key);
+
+            // Wrap asynchronous value in a promise
+            // to normalize the handling of values.
             let value = values[key];
             if (!(value instanceof Promise)) {
                 value = Promise.resolve(value);
             }
+
+            // Push the `key` resolution promise
+            // to the list of the overall resolution,
+            // for waiting the whole result at the end.
             promises.push(
                 Promise.race([
                     validationTimeout(),
                     value,
                 ]).then((value: any) => {
+
+                    // Treat required constraint specially
+                    // so the rest of the validations don't have to
+                    // deal with empty values.
                     if (isEmpty(value)) {
                         if (constraint.required) {
-                            errors.add(key, new ValidationError('Cannot be blank'));
+                            // Add the required validation error to the aggregated error.
+                            errors.add(key, new RequiredValidationError('Cannot be blank'));
                             return;
                         }
                     } else if (constraint.validators) {
-                        const dependencies = dependencyMap.get(key);
-                        return Promise.all(constraint.validators.map((validator: Validator) => {
-                            return Promise.race([
-                                validationTimeout(),
-                                getPromisedDependencyMap(values, dependencies),
-                            ]).then((deps: Map<string, any> | undefined) => {
+
+                        // Retrieve resolved dependencies to use in the validators.
+                        return Promise.race([
+                            validationTimeout(),
+                            getPromisedDependencyMap(values, dependencyMap.get(key)),
+                        ]).then((dependencies: Map<string, any> | undefined): any => {
+
+                            // Run all validators, and race with the timeout.
+                            if (constraint.validators == null) {
+                                return;
+                            }
+
+                            // Create a single validation timeout promise per key
+                            // to share for all validations on a single key.
+                            const keyValidationTimeout = validationTimeout();
+
+                            // Run all validators and resolve when all validators are completed.
+                            return Promise.all(constraint.validators.map((validator: Validator) => {
                                 return Promise.race([
-                                    validationTimeout(),
-                                    validator(value, deps)
+                                    keyValidationTimeout,
+                                    validator(value, dependencies)
+                                        // Handle the validation error up front
+                                        // and add it to the aggregated error.
                                         .catch(keyValidationErrorsHandler),
                                 ]);
-                            });
-                        }));
+                            }));
+                        });
                     }
+
+                // Setup error handling to pick up
+                // timeout errors and dependency resolution errors,
+                // but appropiately rethrow non-related graph
+                // and `legal` validation errors.
                 }, keyValidationErrorsHandler)
                     .catch(keyValidationErrorsHandler)
             );
         }
     }
 
+    // Await all asynchronous work.
     await Promise.all(promises);
 
+    // Throw the aggregated error
+    // any if validation errors was picked up.
     if (errors.length > 0) {
         throw errors;
     }
