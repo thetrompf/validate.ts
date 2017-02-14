@@ -1,21 +1,11 @@
 import {
+    MockGraph
+} from '../__mocks__/dependency-graph';
+
+import {
     Graph,
     GraphError,
 } from '../dependency-graph';
-
-class MockGraph<K, V> extends Graph<K, V> {
-    public getIncomingEdges() {
-        return this.incomingEdges;
-    }
-
-    public getOutgoingEdges() {
-        return this.outgoingEdges;
-    }
-
-    public getNodes(): Map<K, V> {
-        return this.nodes;
-    }
-}
 
 test('hasNode returns true for added node', () => {
     const graph = new Graph<string, void>();
