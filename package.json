@@ -1,33 +1,38 @@
 {
-    "author": "Brian K. Christensen, Resem.pl ltd. <bkc@resem.pl>",
-    "devDependencies": {
-        "@types/jest": "18.1.1",
-        "@types/node": "7.0.5",
-        "jest": "18.1.0",
-        "ts-jest": "18.0.3",
-        "tslib": "1.5.0",
-        "tslint": "4.4.2",
-        "typescript": "2.1.6"
+  "author": "Brian K. Christensen, Resem.pl ltd. <bkc@resem.pl>",
+  "devDependencies": {
+    "@types/jest": "18.1.1",
+    "@types/node": "7.0.5",
+    "eslint": "3.15.0",
+    "eslint-config-airbnb": "14.1.0",
+    "eslint-plugin-import": "2.2.0",
+    "eslint-plugin-jsx-a11y": "4.0.0",
+    "eslint-plugin-react": "6.9.0",
+    "jest": "18.1.0",
+    "ts-jest": "18.0.3",
+    "tslib": "1.5.0",
+    "tslint": "4.4.2",
+    "typescript": "2.1.6"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "jest": {
-        "collectCoverage": true,
-        "transform": {
-            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-        },
-        "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|js)$",
-        "moduleFileExtensions": [
-            "ts",
-            "js"
-        ]
-    },
-    "license": "BSD-3-Clause",
-    "main": "lib/index.js",
-    "name": "validate.ts",
-    "repository": "https://git.input-output.dk/bkc/validate.ts",
-    "scripts": {
-        "build": "rm -Rf lib/*; tsc -p .",
-        "lint": "tslint .",
-        "test": "jest"
-    },
-    "version": "1.0.0"
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ]
+  },
+  "license": "BSD-3-Clause",
+  "main": "lib/index.js",
+  "name": "validate.ts",
+  "repository": "https://git.input-output.dk/bkc/validate.ts",
+  "scripts": {
+    "build": "rm -Rf lib/*; tsc -p .",
+    "lint": "tslint .",
+    "test": "jest"
+  },
+  "version": "1.0.0"
 }
