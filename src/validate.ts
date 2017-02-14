@@ -15,6 +15,7 @@ export interface FieldValuesObject {
 export interface Validator {
     (value: any, dependencies?: Map<string, any> | undefined, options?: any): Promise<void>;
 }
+
 /**
  * The interface/options for constraints.
  */
@@ -211,7 +212,7 @@ async function getPromisedDependencyMap(values: FieldValuesObject, dependencies:
  * If a single validator exceeds the `VALIDATION_TIMEOUT`
  * a `ValidationTimeoutError` is thrown.
  */
-export const validate = async <T extends FieldValuesObject>(values: T, constraints: Constraints<T>): Promise<void> => {
+export async function validate<T extends FieldValuesObject>(values: T, constraints: Constraints<T>): Promise<void> {
     const keys = Object.keys(values);
     const errors = new ValidationAggregateError();
     const promises: Promise<any>[] = [];
