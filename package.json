@@ -25,7 +25,7 @@
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
     "scripts": {
-        "build": "tsc -p .",
+        "build": "rm -Rf lib/*; tsc -p .",
         "lint": "tslint .",
         "test": "jest"
     },
