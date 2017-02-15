@@ -1,6 +1,6 @@
 import {
     Graph,
-} from '../dependency-graph';
+} from 'dependency-graph/graph';
 
 export class MockGraph<K, V> extends Graph<K, V> {
     public getIncomingEdges() {

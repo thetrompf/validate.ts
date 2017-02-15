@@ -1,50 +1,15 @@
 import {
     Graph,
-} from './dependency-graph';
+} from 'dependency-graph/graph';
 
 import {
     ValidationTimeoutError,
-} from './errors';
+} from 'validation/errors';
 
-/**
- * The interface of a validator function.
- */
-export interface Validator<T> {
-    (value: any, dependencies?: Map<keyof T, any> | undefined, options?: any): Promise<void>;
-}
-
-/**
- * The interface for field values to validate.
- */
-export interface FieldValuesObject {
-    [key: string]: any;
-}
-
-/**
- * The interface/options for constraints.
- */
-export interface ConstraintSpecification<T> {
-
-    /**
-     * A list of identifiers to depend on.
-     */
-    dependencies?: [keyof T];
-
-    /**
-     * Mark that the field must have a non-empty value
-     */
-    required?: boolean;
-
-    /**
-     * A list of validators to run against the field value
-     */
-    validators?: Validator<T>[];
-}
-
-export type Constraints<T> = {
-    // tslint:disable-next-line:semicolon
-    [P in keyof T]?: ConstraintSpecification<T>;
-};
+import {
+    Constraints,
+    FieldValuesObject,
+} from 'validation/types';
 
 /**
  * Add `dependencies` as outgoing edges from `node` in the `graph`.

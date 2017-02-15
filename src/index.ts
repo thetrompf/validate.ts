@@ -1,2 +1,7 @@
-export { liveValidate } from './live-validate';
-export { validate } from './validate';
+export {
+    liveValidate,
+} from 'validation/live-validate';
+
+export {
+    validate,
+} from 'validation/validate';

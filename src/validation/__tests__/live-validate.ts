@@ -1,11 +1,11 @@
 import {
     Field,
     FieldAsync,
-} from '../__mocks__/live-validate-fields';
+} from 'validation/__mocks__/live-fields';
 
 import {
     liveValidate,
-} from '../live-validate';
+} from 'validation/live-validate';
 
 test.skip('live validators are called when field emits change', async () => {
     expect.assertions(1);
@@ -16,7 +16,7 @@ test.skip('live validators are called when field emits change', async () => {
     }, {
         field1: {
             validators: [
-                async (value: any, dependencies: Map<string, any>): Promise<void> => {
+                async (value, dependencies): Promise<void> => {
                     expect(value).toEqual('value2');
                 },
             ],

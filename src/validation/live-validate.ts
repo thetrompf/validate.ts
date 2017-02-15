@@ -1,38 +1,29 @@
 import {
-    EventEmitter,
-} from 'events';
-
-import {
     Graph,
-} from './dependency-graph';
+} from 'dependency-graph/graph';
 
 import {
     ValidationAggregateError,
     ValidationError,
-} from './errors';
+} from 'validation/errors';
+
+import {
+    Constraints,
+    ConstraintSpecification,
+    FieldObservables,
+    LiveValueChangeHandler,
+    SubscriptionAborter,
+    ValidationErrorHandler,
+    Validator,
+    ValueProvider,
+} from 'validation/types';
 
 import {
     addAllConstraints,
     buildDependencyMap,
-    Constraints,
-    ConstraintSpecification,
     isEmpty,
     validationTimeout,
-    Validator,
-} from './utils';
-
-export interface ValueProvider extends EventEmitter {
-    getValue(): any;
-}
-
-export interface FieldObservables {
-    [field: string]: ValueProvider;
-}
-
-interface SubscriptionAborter {
-    (): void;
-}
-
+} from 'validation/utils';
 
 /**
  * Return a map with all the values of the `dependencies` resolved,
@@ -41,7 +32,7 @@ interface SubscriptionAborter {
  *
  * If `dependencies` are not provieded the return value is `undefined`.
  */
-export async function getPromisedDependencyMap<T>(values: FieldObservables, dependencies: Set<keyof T> | undefined): Promise<Map<keyof T, any> | undefined> {
+async function getPromisedDependencyMap<T>(values: FieldObservables, dependencies: Set<keyof T> | undefined): Promise<Map<keyof T, any> | undefined> {
     if (dependencies == null) {
         return undefined;
     }
@@ -51,7 +42,6 @@ export async function getPromisedDependencyMap<T>(values: FieldObservables, depe
 
     for (const key of dependencies) {
         let value = values[key];
-        console.log(value);
         if (value != null) {
             value = value.getValue();
             if (value instanceof Promise) {
@@ -68,16 +58,8 @@ export async function getPromisedDependencyMap<T>(values: FieldObservables, depe
     return map;
 }
 
-export interface ValidationErrorHandler {
-    (e: ValidationAggregateError): void;
-}
-
-export interface LiveValueChangeHandler {
-    (): void;
-}
-
-export function liveValidate<T extends FieldObservables>(values: T, constraints: Constraints<T>, handleErrors: ValidationErrorHandler): SubscriptionAborter {
-    const keys = Object.keys(values);
+export function liveValidate<T extends FieldObservables>(values: T, constraints: Constraints<T>, handleErrors: ValidationErrorHandler<T>): SubscriptionAborter {
+    const keys = Object.keys(values) as [keyof T];
     const graph = new Graph<keyof T, ConstraintSpecification<T> | undefined>();
     const subsriptions = new Map<ValueProvider, LiveValueChangeHandler>();
 
@@ -93,7 +75,7 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
             return;
         }
 
-        const errors = new ValidationAggregateError();
+        const errors = new ValidationAggregateError<T>();
 
         const keyValidationErrorsHandler = (e: any) => {
             if (e instanceof ValidationError) {
@@ -113,7 +95,7 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
                 return Promise.race([
                     validationTimeout(),
                     getPromisedDependencyMap<T>(values, dependencyMap.get(key)),
-                ]).then((dependencies: Map<keyof T, any> | undefined): any => {
+                ]).then((dependencies: Map<keyof T, any>): any => {
                     if (constraint.validators == null) {
                         return;
                     }
@@ -123,7 +105,7 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
                     return Promise.all(constraint.validators.map((validator: Validator<T>) => {
                         return Promise.race([
                             keyValidationTimeout,
-                            validator(value, dependencies)
+                            validator(value, dependencies, {})
                                 .catch(keyValidationErrorsHandler),
                         ]);
                     }));

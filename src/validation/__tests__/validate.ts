@@ -1,20 +1,20 @@
 import {
     GraphCycleError,
-} from '../dependency-graph';
+} from 'dependency-graph/errors';
 
 import {
     ValidationAggregateError,
     ValidationError,
     ValidationTimeoutError,
-} from '../errors';
+} from 'validation/errors';
 
 import {
     VALIDATION_TIMEOUT,
-} from '../utils';
+} from 'validation/utils';
 
 import {
     validate,
-} from '../validate';
+} from 'validation/validate';
 
 test('simple call to public interface with empty value and empty constraints', async () => {
     const result = await validate({}, {});
@@ -123,7 +123,7 @@ test('a single field with multiple failing validators', async () => {
         );
     } catch (e) {
         expect(e).toBeInstanceOf(ValidationAggregateError);
-        const aggError = e as ValidationAggregateError;
+        const aggError = e as any;
         expect(aggError.length).toEqual(1);
         expect(aggError.errors.get('field').length).toEqual(2);
         expect(aggError.errors.get('field')[0].message).toEqual('fail 1');
@@ -161,7 +161,7 @@ test('validators of a required field is called when field is empty', async () =>
         );
     } catch (e) {
         expect(e).toBeInstanceOf(ValidationAggregateError);
-        const aggError = e as ValidationAggregateError;
+        const aggError = e as any;
         expect(aggError.length).toEqual(1);
     }
 });
@@ -185,7 +185,7 @@ test('a validator that exceeds timeout throws', async () => {
         );
     } catch (e) {
         expect(e).toBeInstanceOf(ValidationAggregateError);
-        const aggError = e as ValidationAggregateError;
+        const aggError = e as any;
         expect(aggError.length).toEqual(1);
         expect(aggError.errors.get('field')[0]).toBeInstanceOf(ValidationTimeoutError);
     }

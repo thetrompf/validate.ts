@@ -1,26 +1,29 @@
 import {
     Graph,
-} from './dependency-graph';
+} from 'dependency-graph/graph';
 
 import {
     RequiredValidationError,
     ValidationAggregateError,
     ValidationError,
     ValidationTimeoutError,
-} from './errors';
+} from 'validation/errors';
+
+import {
+    Constraints,
+    ConstraintSpecification,
+    FieldValuesObject,
+    Validator,
+} from 'validation/types';
 
 import {
     addAllConstraints,
     addConstraints,
     buildDependencyMap,
-    Constraints,
-    ConstraintSpecification,
-    FieldValuesObject,
     getPromisedDependencyMap,
     isEmpty,
     validationTimeout,
-    Validator,
-} from './utils';
+} from 'validation/utils';
 
 /**
  * Validate `values` against the `constraints` specification.
@@ -34,7 +37,7 @@ import {
  */
 export async function validate<T extends FieldValuesObject>(values: T, constraints: Constraints<T>): Promise<void> {
     const keys = Object.keys(values) as [keyof T];
-    const errors = new ValidationAggregateError();
+    const errors = new ValidationAggregateError<T>();
     const promises: Promise<any>[] = [];
 
     // Create dependency graph.
@@ -97,7 +100,7 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
                         return Promise.race([
                             validationTimeout(),
                             getPromisedDependencyMap<T>(values, dependencyMap.get(key)),
-                        ]).then((dependencies: Map<keyof T, any> | undefined): any => {
+                        ]).then((dependencies: Map<keyof T, any>): any => {
 
                             // Run all validators, and race with the timeout.
                             if (constraint.validators == null) {
@@ -112,7 +115,7 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
                             return Promise.all(constraint.validators.map((validator: Validator<T>) => {
                                 return Promise.race([
                                     keyValidationTimeout,
-                                    validator(value, dependencies)
+                                    validator(value, dependencies, {})
                                         // Handle the validation error up front
                                         // and add it to the aggregated error.
                                         .catch(keyValidationErrorsHandler),

@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
+        "baseUrl": "src",
         "importHelpers": true,
         "module": "commonjs",
         "noEmitHelpers": true,
         "noImplicitAny": true,
         "outDir": "lib",
-        "rootDir": "src",
         "sourceMap": true,
         "strictNullChecks": true,
         "target": "es2015",
@@ -14,7 +14,6 @@
         ]
     },
     "exclude": [
-        "node_modules",
-        "src/**/__tests__/*"
+        "node_modules"
     ]
 }

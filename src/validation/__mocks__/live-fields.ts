@@ -1,4 +1,6 @@
-import { EventEmitter } from 'events';
+import {
+    EventEmitter,
+} from 'events';
 
 export class Field extends EventEmitter {
 

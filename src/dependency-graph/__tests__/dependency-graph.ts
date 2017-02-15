@@ -1,11 +1,10 @@
 import {
     MockGraph
-} from '../__mocks__/dependency-graph';
+} from 'dependency-graph/__mocks__/graph';
 
 import {
     Graph,
-    GraphError,
-} from '../dependency-graph';
+} from 'dependency-graph/graph';
 
 test('hasNode returns true for added node', () => {
     const graph = new Graph<string, void>();
@@ -157,8 +156,8 @@ test('removing a dependency that does not exist does not throw', () => {
 
     const nodes = graph.getNodes();
 
-    const outgoingEdges = graph.getOutgoingEdges().get(node1);
-    const incomingEdges = graph.getIncomingEdges().get(node2);
+    const outgoingEdges = graph.getOutgoingEdges().get(node1) as Set<string>;
+    const incomingEdges = graph.getIncomingEdges().get(node2) as Set<string>;
 
     expect(nodes.size).toEqual(2);
     expect(incomingEdges.size).toEqual(0);

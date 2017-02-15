@@ -23,6 +23,13 @@
     "moduleFileExtensions": [
       "ts",
       "js"
+    ],
+    "moduleDirectories": [
+        "node_modules",
+        "src"
+    ],
+    "modulePathIgnorePatterns": [
+        "<rootDir>/lib/"
     ]
   },
   "license": "BSD-3-Clause",
@@ -30,7 +37,7 @@
   "name": "validate.ts",
   "repository": "https://git.input-output.dk/bkc/validate.ts",
   "scripts": {
-    "build": "rm -Rf lib/*; tsc -p .",
+    "build": "tsc -p .",
     "lint": "tslint .",
     "test": "jest"
   },
