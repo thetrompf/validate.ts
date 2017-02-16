@@ -1,20 +1,52 @@
-image: node:alpine
-
-before_script:
-- npm install
+---
+stages:
+  - test
+  - lint
+  - build
 
 cache:
   paths:
   - node_modules/
 
 lint:
+  image: node:7.5.0-alpine
+  stage: lint
   script:
+  - npm install
   - npm run lint
 
-build:
+test:7.5.0:
+  image: node:7.5.0-alpine
   script:
-  - npm run build
-
-test:
-  script:
+  - npm install
   - npm test
+  stage: test
+
+test:6.9.5:
+  image: node:6.9.5-alpine
+  script:
+  - npm install
+  - npm test
+  stage: test
+
+test:4.7.3:
+  image: node:4.7.3-alpine
+  script:
+  - npm install
+  - npm test
+  stage: test
+
+build:
+  artifacts:
+    paths:
+    - dist/
+    - lib/
+    - lib2015/
+  dependencies:
+    - lint
+    - test
+  image: node:7.5.0-alpine
+  script:
+  - npm install
+  - npm run build
+  stage: build
