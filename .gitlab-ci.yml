@@ -1,31 +1,43 @@
 ---
 stages:
+- prepare
 - test
 - lint
 - build
 
-cache:
-  paths:
-  - node_modules/
+npm:install:
+  artifacts:
+    paths:
+    - node_modules/
+  cache:
+    paths:
+    - node_modules/
+  image: node:7.5.0-alpine
+  script:
+  - npm install
+  stage: prepare
 
 lint:
+  dependencies:
+  - npm:install
   image: node:7.5.0-alpine
-  stage: lint
   script:
-  - npm install
   - npm run lint
+  stage: lint
 
 test:7.5.0:
+  dependencies:
+  - npm:install
   image: node:7.5.0-alpine
   script:
-  - npm install
   - npm test
   stage: test
 
 test:6.9.5:
+  dependencies:
+  - npm:install
   image: node:6.9.5-alpine
   script:
-  - npm install
   - npm test
   stage: test
 
@@ -36,11 +48,8 @@ build:
     - lib/
     - lib2015/
   dependencies:
-    - lint
-    - test:6.9.5
-    - test:7.5.0
+    - npm:install
   image: node:7.5.0-alpine
   script:
-  - npm install
   - npm run build
   stage: build
