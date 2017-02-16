@@ -2,6 +2,11 @@
     "extends": "./tsconfig.lib.commonjs.json",
     "compilerOptions": {
         "module": "amd",
-        "outFile": "dist/amd/validate.js"
+        "lib": [
+            "es2015"
+        ],
+        "outFile": "dist/amd/validate.js",
+        "sourceMap": false,
+        "target": "es5"
     }
 }

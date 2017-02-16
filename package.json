@@ -13,7 +13,8 @@
         "ts-jest": "18.0.3",
         "tslib": "1.5.0",
         "tslint": "4.4.2",
-        "typescript": "2.1.6"
+        "typescript": "2.1.6",
+        "uglify-js": "^2.7.5"
     },
     "jest": {
         "collectCoverage": false,
@@ -22,7 +23,7 @@
             "/__tests__/.*\\.ts$"
         ],
         "globals": {
-            "__TS_CONFIG__": "tsconfig.jest.json"
+            "__TS_CONFIG__": "tsconfig.test.json"
         },
         "moduleFileExtensions": [
             "ts",
@@ -51,16 +52,25 @@
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
     "scripts": {
-        "build-dist-amd": "rm -Rf dist; tsc -p tsconfig.dist.amd.json",
-        "build-dist-system": "rm -Rf dist; tsc -p tsconfig.dist.system.json",
-        "build-lib-commonjs": "rm -Rf lib; tsc -p tsconfig.lib.commonjs.json",
-        "build-lib-es2015": "rm -Rf lib2015; tsc -p tsconfig.lib.es2015.json",
-        "build-source": "rm -Rf build; tsc -p tsconfig.json",
-        "build": "rm -Rf lib; tsc -p tsconfig.lib.commonjs.json && rm -Rf lib2015; tsc -p tsconfig.lib.es2015.json && rm -Rf dist/amd; tsc -p tsconfig.dist.amd.json && rm -Rf dist/system; tsc -p tsconfig.dist.system.json",
+        "_build-dist-amd": "tsc -p tsconfig.dist.amd.json && npm run compress-dist-amd",
+        "_build-dist-system": "tsc -p tsconfig.dist.system.json && npm run compress-dist-system",
+        "_clean-build": "rm -Rf build/",
+        "_clean-dist-amd": "rm -Rf dist/amd/",
+        "_clean-dist-system": "rm -Rf dist/system/",
+        "_clean-lib-commonjs": "rm -Rf lib/",
+        "_clean-lib-es2015": "rm -Rf lib2015/",
+        "clean": "npm run _clean-dist-amd && npm run _clean-dist-system && npm run _clean-lib-commonjs && npm run _clean-lib-es2015 && npm run _clean-build",
+        "build-dist-amd": "npm run _clean-dist-amd && npm run _build-dist-amd && npm run compress-dist-amd",
+        "build-dist-system": "npm run _clean-dist-system && npm run _build-dist-system && npm run compress-dist-system",
+        "build-lib-commonjs": "npm run _clean-lib-commonjs && tsc -p tsconfig.lib.commonjs.json",
+        "build-lib-es2015": "npm run _clean-lib-es2015 && tsc -p tsconfig.lib.es2015.json",
+        "build-source": "npm run _clean-build && tsc -p tsconfig.json",
+        "build": "npm run build-dist-amd && npm run build-dist-system && npm run build-lib-commonjs && npm run build-lib-es2015",
+        "compress-dist-amd": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/amd/validate.min.js -- dist/amd/validate.js",
+        "compress-dist-system": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/system/validate.min.js -- dist/system/validate.js",
         "coverage": "rm -Rf coverage; jest --coverage",
         "lint": "tslint .",
         "test": "jest"
     },
-    "types": "./types/validate.d.ts",
     "version": "1.0.2"
 }

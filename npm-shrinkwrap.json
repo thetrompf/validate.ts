@@ -1,6 +1,6 @@
 {
   "name": "validate.ts",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "dependencies": {
     "@types/jest": {
       "version": "18.1.1",
@@ -137,7 +137,7 @@
       "dev": true
     },
     "async": {
-      "version": "1.5.2",
+      "version": "0.2.10",
       "dev": true
     },
     "asynckit": {
@@ -284,7 +284,7 @@
       "dev": true
     },
     "camelcase": {
-      "version": "3.0.0",
+      "version": "1.2.1",
       "dev": true
     },
     "camelcase-keys": {
@@ -311,8 +311,7 @@
     },
     "center-align": {
       "version": "0.1.3",
-      "dev": true,
-      "optional": true
+      "dev": true
     },
     "chalk": {
       "version": "1.1.3",
@@ -353,8 +352,14 @@
       "dev": true
     },
     "cliui": {
-      "version": "3.2.0",
-      "dev": true
+      "version": "2.1.0",
+      "dev": true,
+      "dependencies": {
+        "wordwrap": {
+          "version": "0.0.2",
+          "dev": true
+        }
+      }
     },
     "clone": {
       "version": "1.0.2",
@@ -892,6 +897,10 @@
       "version": "4.0.6",
       "dev": true,
       "dependencies": {
+        "async": {
+          "version": "1.5.2",
+          "dev": true
+        },
         "source-map": {
           "version": "0.4.4",
           "dev": true
@@ -1130,6 +1139,10 @@
       "version": "0.4.5",
       "dev": true,
       "dependencies": {
+        "async": {
+          "version": "1.5.2",
+          "dev": true
+        },
         "esprima": {
           "version": "2.7.3",
           "dev": true
@@ -1178,6 +1191,10 @@
       "version": "1.0.0-alpha.3",
       "dev": true,
       "dependencies": {
+        "async": {
+          "version": "1.5.2",
+          "dev": true
+        },
         "supports-color": {
           "version": "3.2.3",
           "dev": true
@@ -1218,6 +1235,10 @@
     },
     "jest-environment-node": {
       "version": "18.1.0",
+      "dev": true
+    },
+    "jest-environment-node-debug": {
+      "version": "1.0.0",
       "dev": true
     },
     "jest-file-exists": {
@@ -1332,8 +1353,7 @@
     },
     "lazy-cache": {
       "version": "1.0.4",
-      "dev": true,
-      "optional": true
+      "dev": true
     },
     "lazy-req": {
       "version": "1.1.0",
@@ -1887,8 +1907,7 @@
     },
     "right-align": {
       "version": "0.1.3",
-      "dev": true,
-      "optional": true
+      "dev": true
     },
     "rimraf": {
       "version": "2.5.4",
@@ -2142,39 +2161,16 @@
     "uglify-js": {
       "version": "2.7.5",
       "dev": true,
-      "optional": true,
       "dependencies": {
-        "async": {
-          "version": "0.2.10",
-          "dev": true,
-          "optional": true
-        },
-        "camelcase": {
-          "version": "1.2.1",
-          "dev": true,
-          "optional": true
-        },
-        "cliui": {
-          "version": "2.1.0",
-          "dev": true,
-          "optional": true
-        },
-        "wordwrap": {
-          "version": "0.0.2",
-          "dev": true,
-          "optional": true
-        },
         "yargs": {
           "version": "3.10.0",
-          "dev": true,
-          "optional": true
+          "dev": true
         }
       }
     },
     "uglify-to-browserify": {
       "version": "1.0.2",
-      "dev": true,
-      "optional": true
+      "dev": true
     },
     "unzip-response": {
       "version": "1.0.2",
@@ -2252,8 +2248,7 @@
     },
     "window-size": {
       "version": "0.1.0",
-      "dev": true,
-      "optional": true
+      "dev": true
     },
     "wordwrap": {
       "version": "0.0.3",
@@ -2297,11 +2292,27 @@
     },
     "yargs": {
       "version": "6.6.0",
-      "dev": true
+      "dev": true,
+      "dependencies": {
+        "camelcase": {
+          "version": "3.0.0",
+          "dev": true
+        },
+        "cliui": {
+          "version": "3.2.0",
+          "dev": true
+        }
+      }
     },
     "yargs-parser": {
       "version": "4.2.1",
-      "dev": true
+      "dev": true,
+      "dependencies": {
+        "camelcase": {
+          "version": "3.0.0",
+          "dev": true
+        }
+      }
     }
   }
 }

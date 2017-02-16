@@ -8,7 +8,10 @@
         "src/**/__tests__/*.ts"
     ],
     "compilerOptions": {
+        "declaration": true,
+        "module": "commonjs",
         "noEmitOnError": true,
-        "outDir": "lib"
+        "outDir": "lib",
+        "sourceMap": true
     }
 }

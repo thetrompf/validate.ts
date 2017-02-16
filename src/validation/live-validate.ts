@@ -40,7 +40,7 @@ async function getPromisedDependencyMap<TValues extends FieldObservables>(values
     const map = new Map<keyof TValues, any>();
     const promises: Promise<any>[] = [];
 
-    for (const key of dependencies) {
+    for (const key of Array.from(dependencies.values())) {
         let value = values[key];
         if (value != null) {
             value = value.getValue();

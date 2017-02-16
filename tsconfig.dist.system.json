@@ -2,6 +2,11 @@
     "extends": "./tsconfig.lib.commonjs.json",
     "compilerOptions": {
         "module": "system",
-        "outFile": "dist/system/validate.js"
+        "lib": [
+            "es2015"
+        ],
+        "outFile": "dist/system/validate.js",
+        "sourceMap": false,
+        "target": "es5"
     }
 }

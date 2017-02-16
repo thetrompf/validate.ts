@@ -61,7 +61,7 @@ export async function getPromisedDependencyMap<T>(values: FieldValuesObject, dep
     const map = new Map<keyof T, any>();
     const promises: Promise<any>[] = [];
 
-    for (const key of dependencies) {
+    for (const key of Array.from(dependencies.values())) {
         const value = values[key];
         if (value != null) {
             if (value instanceof Promise) {

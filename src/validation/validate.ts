@@ -62,7 +62,7 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
     };
 
     // Loop through the dependency graph in a resolved execution path.
-    for (const key of graph.overallOrder()) {
+    for (const key of Array.from(graph.overallOrder().values())) {
 
         const constraint = constraints[key];
         if (constraint != undefined) {
@@ -124,10 +124,10 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
                         });
                     }
 
-                // Setup error handling to pick up
-                // timeout errors and dependency resolution errors,
-                // but appropiately rethrow non-related graph
-                // and `legal` validation errors.
+                    // Setup error handling to pick up
+                    // timeout errors and dependency resolution errors,
+                    // but appropiately rethrow non-related graph
+                    // and `legal` validation errors.
                 }, keyValidationErrorsHandler)
                     .catch(keyValidationErrorsHandler)
             );
