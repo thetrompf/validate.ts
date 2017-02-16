@@ -1,4 +1,6 @@
 build/
-dist/
 coverage/
+dist/
+lib/
+lib2015/
 node_modules/

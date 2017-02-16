@@ -8,9 +8,7 @@
         "src/**/__tests__/*.ts"
     ],
     "compilerOptions": {
-        "declaration": true,
-        "declarationDir": "types",
         "noEmitOnError": true,
-        "outDir": "dist/commonjs"
+        "outDir": "lib"
     }
 }

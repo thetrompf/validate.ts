@@ -29,13 +29,16 @@
             "js"
         ],
         "moduleDirectories": [
-            "node_modules",
-            "src"
+            "node_modules"
+        ],
+        "modulePaths": [
+            "<rootDir>/src/"
         ],
         "modulePathIgnorePatterns": [
-            "<rootDir>/dist/commonjs",
-            "<rootDir>/dist/es2015",
-            "<rootDir>/lib/"
+            "<rootDir>/build/",
+            "<rootDir>/dist/",
+            "<rootDir>/lib/",
+            "<rootDir>/lib2015/"
         ]
     },
     "license": "BSD-3-Clause",
@@ -43,10 +46,12 @@
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
     "scripts": {
+        "build-dist-amd": "rm -Rf dist; tsc -p tsconfig.dist.amd.json",
+        "build-dist-system": "rm -Rf dist; tsc -p tsconfig.dist.system.json",
+        "build-lib-commonjs": "rm -Rf lib; tsc -p tsconfig.lib.commonjs.json",
+        "build-lib-es2015": "rm -Rf lib2015; tsc -p tsconfig.lib.es2015.json",
         "build-source": "rm -Rf build; tsc -p tsconfig.json",
-        "build-dist-commonjs": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
-        "build-dist-es2015": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
-        "build": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json && rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
+        "build": "rm -Rf lib; tsc -p tsconfig.lib.commonjs.json && rm -Rf lib2015; tsc -p tsconfig.lib.es2015.json && rm -Rf dist/amd; tsc -p tsconfig.dist.amd.json && rm -Rf dist/system; tsc -p tsconfig.dist.system.json",
         "lint": "tslint .",
         "test": "rm -Rf coverage; jest"
     },

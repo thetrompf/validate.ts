@@ -1,0 +1,7 @@
+{
+    "extends": "./tsconfig.lib.commonjs.json",
+    "compilerOptions": {
+        "module": "amd",
+        "outFile": "dist/amd/validate.js"
+    }
+}

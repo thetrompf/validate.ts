@@ -1,9 +1,11 @@
 .vscode/
 coverage/
-node_modules/
 .eslintrc.json
 .gitignore
 .gitlab-ci.yml
 tslint.json
 tsconfig.json
-tsconfig.build.json
+tsconfig.dist.amd.json
+tsconfig.dist.system.json
+tsconfig.lib.commonjs.json
+tsconfig.lib.es2015.json
