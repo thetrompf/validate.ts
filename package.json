@@ -51,5 +51,5 @@
         "test": "rm -Rf coverage; jest"
     },
     "types": "./types/validate.d.ts",
-    "version": "1.0.1"
+    "version": "1.0.2"
 }
