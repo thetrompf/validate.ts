@@ -2,7 +2,7 @@ import {
     Graph,
 } from 'dependency-graph/graph';
 
-export class MockGraph<K, V> extends Graph<K, V> {
+export class MockGraph<TNode, TData> extends Graph<TNode, TData> {
     public getIncomingEdges() {
         return this.incomingEdges;
     }
@@ -11,7 +11,7 @@ export class MockGraph<K, V> extends Graph<K, V> {
         return this.outgoingEdges;
     }
 
-    public getNodes(): Map<K, V> {
+    public getNodes(): Map<TNode, TData> {
         return this.nodes;
     }
 }

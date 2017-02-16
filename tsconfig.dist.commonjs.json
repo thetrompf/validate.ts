@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.json",
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "src/**/__mocks__/*.ts",
+        "src/**/__tests__/*.ts"
+    ],
+    "compilerOptions": {
+        "declaration": true,
+        "declarationDir": "types",
+        "noEmitOnError": true,
+        "outDir": "dist/commonjs"
+    }
+}

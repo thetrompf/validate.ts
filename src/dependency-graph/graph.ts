@@ -11,22 +11,22 @@ import {
  * A simple class for modelling a
  * dependency graph data structure.
  */
-export class Graph<K, V> {
+export class Graph<TNode, TData> {
 
     /**
      * This property is only protected for testing purposes.
      **/
-    protected incomingEdges: Map<K, Set<K>>;
+    protected incomingEdges: Map<TNode, Set<TNode>>;
 
     /**
      * This property is only protected for testing purposes.
      **/
-    protected outgoingEdges: Map<K, Set<K>>;
+    protected outgoingEdges: Map<TNode, Set<TNode>>;
 
     /**
      * This property is only protected for testing purposes.
      */
-    protected nodes: Map<K, V>;
+    protected nodes: Map<TNode, TData>;
 
     public constructor() {
         this.nodes = new Map;
@@ -41,7 +41,7 @@ export class Graph<K, V> {
      * If the `node` already exists,
      * the call would be a no-op.
      */
-    public addNode(node: K, data: V): void {
+    public addNode(node: TNode, data: TData): void {
         if (!this.nodes.has(node)) {
             this.nodes.set(node, data);
 
@@ -55,7 +55,7 @@ export class Graph<K, V> {
      *
      * If the `node` doesn't exist it will throw `NoSuchNodeGraphError`.
      */
-    public getNodeData(node: K): V {
+    public getNodeData(node: TNode): TData {
         const data = this.nodes.get(node);
         if (data == null) {
             throw new NoSuchNodeGraphError(node);
@@ -67,7 +67,7 @@ export class Graph<K, V> {
      * Set new `data` on the `node`.
      * If the `node` doesn't exist it will throw `NoSuchNodeGraphError`.
      */
-    public setNodeData(node: K, data: V): void {
+    public setNodeData(node: TNode, data: TData): void {
         if (!this.nodes.has(node)) {
             throw new NoSuchNodeGraphError(node);
         }
@@ -77,7 +77,7 @@ export class Graph<K, V> {
     /**
      * Returns true if the `node` exists in the graph.
      */
-    public hasNode(node: K): boolean {
+    public hasNode(node: TNode): boolean {
         return this.nodes.has(node);
     }
 
@@ -88,7 +88,7 @@ export class Graph<K, V> {
      * If `fromNode` or `toNode` don't exist
      * a `NoSuchNodeGraphError` is thrown.
      */
-    public addDependency(fromNode: K, toNode: K): void {
+    public addDependency(fromNode: TNode, toNode: TNode): void {
         const outgoingEdges = this.outgoingEdges.get(fromNode);
         if (outgoingEdges == null) {
             throw new NoSuchNodeGraphError(fromNode);
@@ -109,7 +109,7 @@ export class Graph<K, V> {
      * If `fromNode` or `toNode` don't exist
      * a `NoSuchNodeGraphError` is thrown.
      */
-    public removeDependency(fromNode: K, toNode: K): void {
+    public removeDependency(fromNode: TNode, toNode: TNode): void {
         const outgoingEdges = this.outgoingEdges.get(fromNode);
         if (outgoingEdges != null) {
             outgoingEdges.delete(toNode);
@@ -129,9 +129,9 @@ export class Graph<K, V> {
      * If `node` does not exist in the graph
      *    a `NoSuchNodeGraphError` is thrown.
      */
-    public dependenciesOf(node: K, leavesOnly: boolean = false): Set<K> {
+    public dependenciesOf(node: TNode, leavesOnly: boolean = false): Set<TNode> {
         if (this.nodes.has(node)) {
-            const result = new Set<K>();
+            const result = new Set<TNode>();
             const dfs = createDfs(this.outgoingEdges, leavesOnly, result);
 
             dfs(node);
@@ -151,9 +151,9 @@ export class Graph<K, V> {
      * If `node` does not exist in the graph
      *    a `NoSuchNodeGraphError` is thrown.
      */
-    public dependantsOf(node: K, leavesOnly: boolean = false): Set<K> {
+    public dependantsOf(node: TNode, leavesOnly: boolean = false): Set<TNode> {
         if (this.nodes.has(node)) {
-            const result = new Set<K>();
+            const result = new Set<TNode>();
             const dfs = createDfs(this.incomingEdges, leavesOnly, result);
 
             dfs(node);
@@ -171,8 +171,8 @@ export class Graph<K, V> {
      * If `leavesOnly` is true, only the leaves of execution path is returned.
      * If a cycle is detected a `GraphCycleError` is thrown.
      */
-    public overallOrder(leavesOnly: boolean = false): Set<K> {
-        const result = new Set<K>();
+    public overallOrder(leavesOnly: boolean = false): Set<TNode> {
+        const result = new Set<TNode>();
 
         if (this.nodes.size === 0) {
             return result;
@@ -181,7 +181,7 @@ export class Graph<K, V> {
         const keys = Array.from(this.nodes.keys());
 
         // detect cycles in the graph.
-        const cycleDfs = createDfs(this.outgoingEdges, false, new Set<K>());
+        const cycleDfs = createDfs(this.outgoingEdges, false, new Set<TNode>());
         keys.forEach(cycleDfs);
 
         const dfs = createDfs(this.outgoingEdges, leavesOnly, result);

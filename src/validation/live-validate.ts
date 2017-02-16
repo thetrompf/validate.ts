@@ -32,12 +32,12 @@ import {
  *
  * If `dependencies` are not provieded the return value is `undefined`.
  */
-async function getPromisedDependencyMap<T>(values: FieldObservables, dependencies: Set<keyof T> | undefined): Promise<Map<keyof T, any> | undefined> {
+async function getPromisedDependencyMap<TValues extends FieldObservables>(values: TValues, dependencies: Set<keyof TValues> | undefined): Promise<Map<keyof TValues, any> | undefined> {
     if (dependencies == null) {
         return undefined;
     }
 
-    const map = new Map<keyof T, any>();
+    const map = new Map<keyof TValues, any>();
     const promises: Promise<any>[] = [];
 
     for (const key of dependencies) {
@@ -58,11 +58,11 @@ async function getPromisedDependencyMap<T>(values: FieldObservables, dependencie
     return map;
 }
 
-export function liveValidate<T extends FieldObservables>(values: T, constraints: Constraints<T>, handleErrors: ValidationErrorHandler<T>): SubscriptionAborter {
+export function liveValidate<TValues extends FieldObservables>(values: TValues, constraints: Constraints<TValues>, handleErrors: ValidationErrorHandler<TValues>): SubscriptionAborter {
     let isSubscriptionActive = true;
 
-    const keys = Object.keys(values) as [keyof T];
-    const graph = new Graph<keyof T, ConstraintSpecification<T> | undefined>();
+    const keys = Object.keys(values) as [keyof TValues];
+    const graph = new Graph<keyof TValues, ConstraintSpecification<TValues> | undefined>();
     const subsriptions = new Map<ValueProvider, LiveValueChangeHandler>();
 
     keys.forEach(key => graph.addNode(key, constraints[key]));
@@ -71,7 +71,7 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
 
     addAllConstraints(graph, keys, dependencyMap);
 
-    const handleChanges = (key: keyof T) => (cb?: Function) => {
+    const handleChanges = (key: keyof TValues) => (cb?: Function) => {
         if (!isSubscriptionActive) {
             if (cb != null) {
                 cb();
@@ -84,7 +84,7 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
             return;
         }
 
-        const errors = new ValidationAggregateError<T>();
+        const errors = new ValidationAggregateError<TValues>();
 
         const keyValidationErrorsHandler = (e: any) => {
             if (e instanceof ValidationError) {
@@ -103,15 +103,15 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
             } else if (constraint.validators != null) {
                 return Promise.race([
                     validationTimeout(),
-                    getPromisedDependencyMap<T>(values, dependencyMap.get(key)),
-                ]).then((dependencies: Map<keyof T, any>): any => {
+                    getPromisedDependencyMap<TValues>(values, dependencyMap.get(key)),
+                ]).then((dependencies: Map<keyof TValues, any>): any => {
                     if (constraint.validators == null) {
                         return;
                     }
 
                     const keyValidationTimeout = validationTimeout();
 
-                    return Promise.all(constraint.validators.map((validator: Validator<T>) => {
+                    return Promise.all(constraint.validators.map((validator: Validator<TValues>) => {
                         return Promise.race([
                             keyValidationTimeout,
                             validator(value, dependencies, {})
@@ -124,22 +124,22 @@ export function liveValidate<T extends FieldObservables>(values: T, constraints:
             }
         }, keyValidationErrorsHandler)
             .catch(keyValidationErrorsHandler)
-        .then(() => {
-            if (errors.length !== 0) {
-                handleErrors(errors);
-            }
-            if (cb != null) {
-                if (errors.length === 0) {
-                    cb();
-                } else {
-                    cb(errors);
+            .then(() => {
+                if (errors.length !== 0) {
+                    handleErrors(errors);
                 }
-            }
-        }, (e) => {
-            if (cb != null) {
-                cb(e);
-            }
-        });
+                if (cb != null) {
+                    if (errors.length === 0) {
+                        cb();
+                    } else {
+                        cb(errors);
+                    }
+                }
+            }, (e) => {
+                if (cb != null) {
+                    cb(e);
+                }
+            });
     };
 
     for (const key in constraints) {

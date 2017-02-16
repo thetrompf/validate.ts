@@ -1,49 +1,53 @@
 {
-  "author": "Brian K. Christensen, Resem.pl ltd. <bkc@resem.pl>",
-  "devDependencies": {
-    "@types/jest": "18.1.1",
-    "@types/node": "7.0.5",
-    "eslint": "3.15.0",
-    "eslint-config-airbnb": "14.1.0",
-    "eslint-plugin-import": "2.2.0",
-    "eslint-plugin-jsx-a11y": "4.0.0",
-    "eslint-plugin-react": "6.9.0",
-    "jest": "18.1.0",
-    "ts-jest": "18.0.3",
-    "tslib": "1.5.0",
-    "tslint": "4.4.2",
-    "typescript": "2.1.6"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "coveragePathIgnorePatterns": [
-        "/node_modules/",
-        "/__tests__/.*\\.ts$"
-    ],
-    "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    "author": "Brian K. Christensen, Resem.pl ltd. <bkc@resem.pl>",
+    "devDependencies": {
+        "@types/jest": "18.1.1",
+        "@types/node": "7.0.5",
+        "eslint": "3.15.0",
+        "eslint-config-airbnb": "14.1.0",
+        "eslint-plugin-import": "2.2.0",
+        "eslint-plugin-jsx-a11y": "4.0.0",
+        "eslint-plugin-react": "6.10.0",
+        "jest": "18.1.0",
+        "ts-jest": "18.0.3",
+        "tslib": "1.5.0",
+        "tslint": "4.4.2",
+        "typescript": "2.1.6"
     },
-    "testRegex": "/__tests__/.*\\.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "moduleDirectories": [
-        "node_modules",
-        "src"
-    ],
-    "modulePathIgnorePatterns": [
-        "<rootDir>/lib/"
-    ]
-  },
-  "license": "BSD-3-Clause",
-  "main": "lib/index.js",
-  "name": "validate.ts",
-  "repository": "https://git.input-output.dk/bkc/validate.ts",
-  "scripts": {
-    "build": "tsc -p .",
-    "lint": "tslint .",
-    "test": "jest"
-  },
-  "version": "1.0.0"
+    "jest": {
+        "collectCoverage": true,
+        "coveragePathIgnorePatterns": [
+            "/node_modules/",
+            "/__tests__/.*\\.ts$"
+        ],
+        "transform": {
+            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+        },
+        "testRegex": "/__tests__/.*\\.ts$",
+        "moduleFileExtensions": [
+            "ts",
+            "js"
+        ],
+        "moduleDirectories": [
+            "node_modules",
+            "src"
+        ],
+        "modulePathIgnorePatterns": [
+            "<rootDir>/lib/"
+        ]
+    },
+    "license": "BSD-3-Clause",
+    "main": "lib/validate.js",
+    "name": "validate.ts",
+    "repository": "https://git.input-output.dk/bkc/validate.ts",
+    "scripts": {
+        "build-source": "rm -Rf build; tsc -p tsconfig.json",
+        "build-dist-commonjs": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
+        "build-dist-es2015": "rm -Rf dist/es2015; tsc -p tsconfig.dist.es2015.json",
+        "build": "yarn run build-dist-commonjs && yarn run build-dist-es2015",
+        "lint": "tslint .",
+        "test": "rm -Rf coverage; jest"
+    },
+    "types": "./types/validate.d.ts",
+    "version": "1.0.0"
 }

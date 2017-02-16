@@ -6,8 +6,8 @@ import {
 /**
  * The interface of a depth first search call.
  */
-interface DFS<K> {
-    (node: K): void;
+export interface DFS<TNode> {
+    (node: TNode): void;
 }
 
 /**
@@ -17,11 +17,11 @@ interface DFS<K> {
  *
  * If a cycle is detected a `GraphCycleError` is thrown.
  */
-export function createDfs<K>(edges: Map<K, Set<K>>, leavesOnly: boolean, result: Set<K>): DFS<K> {
-    const stack: K[] = [];
-    const visited: Set<K> = new Set();
+export function createDfs<TNode>(edges: Map<TNode, Set<TNode>>, leavesOnly: boolean, result: Set<TNode>): DFS<TNode> {
+    const stack: TNode[] = [];
+    const visited: Set<TNode> = new Set();
 
-    const dfs = (currentNode: K): void => {
+    const dfs = (currentNode: TNode): void => {
         visited.add(currentNode);
         stack.push(currentNode);
 

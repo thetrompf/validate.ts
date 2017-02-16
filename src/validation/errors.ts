@@ -1,3 +1,4 @@
+
 /**
  * The base validation error.
  */
@@ -23,9 +24,9 @@ export class RequiredValidationError extends ValidationError {
 /**
  * The aggregated error to be thrown to the caller.
  */
-export class ValidationAggregateError<T> extends ValidationError {
+export class ValidationAggregateError<TValues> extends ValidationError {
 
-    private _errors: Map<keyof T, ValidationError[]>;
+    private _errors: Map<keyof TValues, ValidationError[]>;
 
     public constructor() {
         super();
@@ -49,7 +50,7 @@ export class ValidationAggregateError<T> extends ValidationError {
     /**
      * Add a validation error to `field`.
      */
-    public add(field: keyof T, error: ValidationError): void {
+    public add(field: keyof TValues, error: ValidationError): void {
         if (this._errors.has(field)) {
             const errors = this._errors.get(field) as ValidationError[];
             errors.push(error);
