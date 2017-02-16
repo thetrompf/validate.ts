@@ -1,8 +1,8 @@
 ---
 stages:
-  - test
-  - lint
-  - build
+- test
+- lint
+- build
 
 cache:
   paths:
@@ -44,7 +44,9 @@ build:
     - lib2015/
   dependencies:
     - lint
-    - test
+    - test:4.7.3
+    - test:6.9.5
+    - test:7.5.0
   image: node:7.5.0-alpine
   script:
   - npm install
