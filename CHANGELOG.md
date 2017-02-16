@@ -1,3 +1,7 @@
+## 1.0.2 (February 16, 2017)
+* Regression: fix error in build process.
+  Don't depend on yarn in npm scripts
+
 ## 1.0.1 (February 16, 2017)
 
 * Simple live validation.

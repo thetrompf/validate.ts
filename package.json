@@ -33,6 +33,8 @@
             "src"
         ],
         "modulePathIgnorePatterns": [
+            "<rootDir>/dist/commonjs",
+            "<rootDir>/dist/es2015",
             "<rootDir>/lib/"
         ]
     },
@@ -43,8 +45,8 @@
     "scripts": {
         "build-source": "rm -Rf build; tsc -p tsconfig.json",
         "build-dist-commonjs": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
-        "build-dist-es2015": "rm -Rf dist/es2015; tsc -p tsconfig.dist.es2015.json",
-        "build": "yarn run build-dist-commonjs && yarn run build-dist-es2015",
+        "build-dist-es2015": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
+        "build": "rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json && rm -Rf dist/commonjs; tsc -p tsconfig.dist.commonjs.json",
         "lint": "tslint .",
         "test": "rm -Rf coverage; jest"
     },
