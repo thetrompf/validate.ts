@@ -14,14 +14,14 @@ test('live validators are called when field emits change', async () => {
     liveValidate({
         field1: field1,
     }, {
-        field1: {
-            validators: [
-                async (value, dependencies): Promise<void> => {
-                    expect(value).toEqual('value2');
-                },
-            ],
-        },
-    }, errors => {});
+            field1: {
+                validators: [
+                    async (value, dependencies): Promise<void> => {
+                        expect(value).toEqual('value2');
+                    },
+                ],
+            },
+        }, errors => { });
 
     field1.setValue('value2');
     return field1.triggerChange();
@@ -35,14 +35,14 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
     const abortSubscriptions = liveValidate({
         field1: field1
     }, {
-        field1: {
-            validators: [
-                async (value, dependencies): Promise<void> => {
-                    validatorCalled++;
-                },
-            ]
-        }
-    }, errors => {});
+            field1: {
+                validators: [
+                    async (value, dependencies): Promise<void> => {
+                        validatorCalled++;
+                    },
+                ]
+            }
+        }, errors => { });
 
     await field1.triggerChange();
     expect(validatorCalled).toBe(1);
@@ -58,14 +58,14 @@ test('promised values are resolved when passed to validators', async () => {
     liveValidate({
         field1: field1
     }, {
-        field1: {
-            validators: [
-                async (value) => {
-                    expect(value).toEqual('async-value1');
-                }
-            ]
-        }
-    }, errors => {});
+            field1: {
+                validators: [
+                    async (value) => {
+                        expect(value).toEqual('async-value1');
+                    }
+                ]
+            }
+        }, errors => { });
 
     return field1.triggerChange();
 });

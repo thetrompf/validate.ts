@@ -9,21 +9,21 @@
         "eslint-plugin-jsx-a11y": "4.0.0",
         "eslint-plugin-react": "6.10.0",
         "jest": "18.1.0",
+        "jest-environment-node-debug": "^1.0.0",
         "ts-jest": "18.0.3",
         "tslib": "1.5.0",
         "tslint": "4.4.2",
         "typescript": "2.1.6"
     },
     "jest": {
-        "collectCoverage": true,
+        "collectCoverage": false,
         "coveragePathIgnorePatterns": [
             "/node_modules/",
             "/__tests__/.*\\.ts$"
         ],
-        "transform": {
-            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+        "globals": {
+            "__TS_CONFIG__": "tsconfig.jest.json"
         },
-        "testRegex": "/__tests__/.*\\.ts$",
         "moduleFileExtensions": [
             "ts",
             "js"
@@ -39,7 +39,12 @@
             "<rootDir>/dist/",
             "<rootDir>/lib/",
             "<rootDir>/lib2015/"
-        ]
+        ],
+        "transform": {
+            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+        },
+        "testEnvironment": "node",
+        "testRegex": "/__tests__/.*\\.ts$"
     },
     "license": "BSD-3-Clause",
     "main": "lib/validate.js",
@@ -52,8 +57,9 @@
         "build-lib-es2015": "rm -Rf lib2015; tsc -p tsconfig.lib.es2015.json",
         "build-source": "rm -Rf build; tsc -p tsconfig.json",
         "build": "rm -Rf lib; tsc -p tsconfig.lib.commonjs.json && rm -Rf lib2015; tsc -p tsconfig.lib.es2015.json && rm -Rf dist/amd; tsc -p tsconfig.dist.amd.json && rm -Rf dist/system; tsc -p tsconfig.dist.system.json",
+        "coverage": "rm -Rf coverage; jest --coverage",
         "lint": "tslint .",
-        "test": "rm -Rf coverage; jest"
+        "test": "jest"
     },
     "types": "./types/validate.d.ts",
     "version": "1.0.2"
