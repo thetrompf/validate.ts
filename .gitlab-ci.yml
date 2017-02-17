@@ -5,7 +5,7 @@ stages:
 - lint
 - build
 
-npm:install:
+yarn:install:
   artifacts:
     paths:
     - node_modules/
@@ -21,7 +21,7 @@ npm:install:
 
 lint:
   dependencies:
-  - npm:install
+  - yarn:install
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
   - yarn lint
@@ -31,7 +31,7 @@ lint:
 
 test:7.5.0:
   dependencies:
-  - npm:install
+  - yarn:install
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
   - yarn test
@@ -41,7 +41,7 @@ test:7.5.0:
 
 test:6.9.5:
   dependencies:
-  - npm:install
+  - yarn:install
   image: docker.input-output.dk/docker/nodejs:6.9.5
   script:
   - yarn test
@@ -56,7 +56,7 @@ build:
     - lib/
     - lib2015/
   dependencies:
-    - npm:install
+    - yarn:install
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
   - yarn build
