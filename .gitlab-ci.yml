@@ -42,9 +42,9 @@ test:7.5.0:
 test:6.9.5:
   dependencies:
   - npm:install
-  image: node:6.9.5-alpine
+  image: docker.input-output.dk/docker/nodejs:6.9.5
   script:
-  - npm test
+  - yarn test
   stage: test
   tags:
   - kubernetes
