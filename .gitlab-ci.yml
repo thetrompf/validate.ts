@@ -16,6 +16,8 @@ npm:install:
   script:
   - npm install
   stage: prepare
+  tags:
+  - kubernetes
 
 lint:
   dependencies:
@@ -24,6 +26,8 @@ lint:
   script:
   - npm run lint
   stage: lint
+  tags:
+  - kubernetes
 
 test:7.5.0:
   dependencies:
@@ -32,6 +36,8 @@ test:7.5.0:
   script:
   - npm test
   stage: test
+  tags:
+  - kubernetes
 
 test:6.9.5:
   dependencies:
@@ -40,6 +46,8 @@ test:6.9.5:
   script:
   - npm test
   stage: test
+  tags:
+  - kubernetes
 
 build:
   artifacts:
@@ -53,3 +61,5 @@ build:
   script:
   - npm run build
   stage: build
+  tags:
+  - kubernetes
