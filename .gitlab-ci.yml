@@ -14,7 +14,7 @@ npm:install:
     - node_modules/
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
-  - npm install
+  - yarn install
   stage: prepare
   tags:
   - kubernetes
@@ -22,9 +22,9 @@ npm:install:
 lint:
   dependencies:
   - npm:install
-  image: node:7.5.0-alpine
+  image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
-  - npm run lint
+  - yarn lint
   stage: lint
   tags:
   - kubernetes
@@ -34,7 +34,7 @@ test:7.5.0:
   - npm:install
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
-  - npm test
+  - yarn test
   stage: test
   tags:
   - kubernetes
@@ -59,7 +59,7 @@ build:
     - npm:install
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
-  - npm run build
+  - yarn build
   stage: build
   tags:
   - kubernetes
