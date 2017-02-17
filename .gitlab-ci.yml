@@ -12,7 +12,7 @@ npm:install:
   cache:
     paths:
     - node_modules/
-  image: node:7.5.0-alpine
+  image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
   - npm install
   stage: prepare
@@ -32,7 +32,7 @@ lint:
 test:7.5.0:
   dependencies:
   - npm:install
-  image: node:7.5.0-alpine
+  image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
   - npm test
   stage: test
@@ -57,7 +57,7 @@ build:
     - lib2015/
   dependencies:
     - npm:install
-  image: node:7.5.0-alpine
+  image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
   - npm run build
   stage: build
