@@ -165,6 +165,14 @@ export class Graph<TNode, TData> {
         }
     }
 
+    public immediateDependantsOf(node: TNode): Set<TNode> {
+        if (this.nodes.has(node)) {
+            return this.incomingEdges.get(node) as Set<TNode>;
+        } else {
+            throw new NoSuchNodeGraphError(node);
+        }
+    }
+
     /**
      * Return a valid solved execution path of the dependency graph.
      *

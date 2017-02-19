@@ -37,10 +37,10 @@ export function addAllConstraints<K, V>(graph: Graph<K, V>, nodes: K[], dependen
  */
 export function buildDependencyMap<T>(constraints: Constraints<T>): Map<keyof T, Set<keyof T>> {
     const dependencyMap = new Map<keyof T, Set<keyof T>>();
-    for (const key in constraints) {
-        const nodeConstraint = constraints[key];
+    for (const node in constraints) {
+        const nodeConstraint = constraints[node];
         if (nodeConstraint && nodeConstraint.dependencies != null) {
-            dependencyMap.set(key, new Set<keyof T>(nodeConstraint.dependencies));
+            dependencyMap.set(node, new Set<keyof T>(nodeConstraint.dependencies));
         }
     }
     return dependencyMap;
@@ -87,10 +87,10 @@ export const VALIDATION_TIMEOUT = 2000;
  * Function that returns a promise that rejects
  * after the `VALIDATION_TIMEOUT` has exceeded.
  */
-export function validationTimeout(): Promise<void> {
+export function validationTimeout(id?: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         setTimeout(() => {
-            reject(new ValidationTimeoutError('Validation timeout'));
+            reject(new ValidationTimeoutError('Validation timeout' + (id == null ? '' : id)));
         }, VALIDATION_TIMEOUT);
     });
 }
