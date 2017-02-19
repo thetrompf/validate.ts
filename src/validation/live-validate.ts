@@ -32,9 +32,9 @@ import {
  *
  * If `dependencies` are not provieded the return value is `undefined`.
  */
-async function getPromisedDependencyMap<TValues extends FieldObservables>(values: TValues, dependencies: Set<keyof TValues> | undefined): Promise<Map<keyof TValues, any> | undefined> {
+async function getPromisedDependencyMap<TValues extends FieldObservables>(values: TValues, dependencies: Set<keyof TValues> | undefined): Promise<Map<keyof TValues, any>> {
     if (dependencies == null) {
-        return undefined;
+        return new Map();
     }
 
     const map = new Map<keyof TValues, any>();
@@ -79,11 +79,6 @@ export function liveValidate<TValues extends FieldObservables>(values: TValues, 
             return;
         }
 
-        const constraint = constraints[key];
-        if (constraint == undefined) {
-            return;
-        }
-
         const errors = new ValidationAggregateError<TValues>();
 
         const keyValidationErrorsHandler = (e: any) => {
@@ -93,6 +88,70 @@ export function liveValidate<TValues extends FieldObservables>(values: TValues, 
             }
             throw e;
         };
+
+        const constraint = constraints[key];
+        if (constraint == undefined) {
+            const dependants = graph.dependenciesOf(key);
+            const promises: Promise<void>[] = [];
+            for (const dependant of Array.from(dependants)) {
+                const dependantErrorsHandler = (e: any) => {
+                    if (e instanceof ValidationError) {
+                        errors.add(dependant, e);
+                        return;
+                    }
+                    throw e;
+                };
+
+                const constraint = constraints[dependant];
+                if (constraint && constraint.validators) {
+                    promises.push(Promise.race([
+                        validationTimeout(),
+                        values[key].getValue(),
+                    ]).then((value: any) => {
+                        if (isEmpty(value)) {
+                            return;
+                        }
+
+                        return Promise.race([
+                            validationTimeout(),
+                            getPromisedDependencyMap(values, dependencyMap.get(dependant)),
+                        ]).then(async (dependecies: Map<keyof TValues, any>) => {
+                            if (constraint.validators == null) {
+                                return;
+                            }
+
+                            const keyValidationTimeout = validationTimeout();
+                            return Promise.all(constraint.validators.map((validate: Validator<TValues>) => {
+                                return Promise.race([
+                                    keyValidationTimeout,
+                                    validate(value, dependecies, {})
+                                        .catch(dependantErrorsHandler),
+                                ]);
+                            }));
+                        });
+                    }, dependantErrorsHandler)
+                        .catch(dependantErrorsHandler));
+                }
+            }
+
+            Promise.all(promises).then(() => {
+                if (errors.length !== 0) {
+                    handleErrors(errors);
+                }
+                if (cb != null) {
+                    if (errors.length === 0) {
+                        cb();
+                    } else {
+                        cb(errors);
+                    }
+                }
+            }, (e) => {
+                if (cb != null) {
+                    cb(e);
+                }
+            });
+            return;
+        }
 
         const value = Promise.race([
             validationTimeout(),
@@ -104,7 +163,7 @@ export function liveValidate<TValues extends FieldObservables>(values: TValues, 
                 return Promise.race([
                     validationTimeout(),
                     getPromisedDependencyMap<TValues>(values, dependencyMap.get(key)),
-                ]).then((dependencies: Map<keyof TValues, any>): any => {
+                ]).then(async (dependencies: Map<keyof TValues, any>) => {
                     if (constraint.validators == null) {
                         return;
                     }
@@ -142,7 +201,7 @@ export function liveValidate<TValues extends FieldObservables>(values: TValues, 
             });
     };
 
-    for (const key in constraints) {
+    for (const key in values) {
         const valueProvider = values[key];
         const keyChangeHandler = handleChanges(key);
         subsriptions.set(valueProvider, keyChangeHandler);
