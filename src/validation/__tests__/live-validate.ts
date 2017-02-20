@@ -315,7 +315,7 @@ test('validators beyond dependency level 2 is called', async () => {
     expect(errorHandler).not.toHaveBeenCalled();
 });
 
-test.skip('validators beyond 2nd level of dependency breaks the dependency chain', async () => {
+test('validators beyond 2nd level of dependency breaks the dependency chain', async () => {
     const a = new Field('A');
     const b = new Field('B');
     const c = new Field('C');
@@ -375,4 +375,38 @@ test.skip('validators beyond 2nd level of dependency breaks the dependency chain
     expect(dValidator).not.toHaveBeenCalled();
 
     expect(errorHandler).toHaveBeenCalled();
+});
+
+test('dependant validators is run even if no validators defined on first level in the graph', async () => {
+    const a = new Field('A');
+    const b = new Field('B');
+
+    const bValidator = jest.fn();
+    const errorHandler = jest.fn();
+
+    bValidator.mockReturnValue(Promise.resolve());
+
+    liveValidate(
+        {
+            a: a,
+            b: b,
+        }, {
+            a: {
+                dependencies: <any>[],
+            },
+            b: {
+                dependencies: ['a'],
+                validators: [
+                    bValidator,
+                ],
+            },
+        },
+        errorHandler,
+    );
+
+    a.setValue('A\'');
+    await a.triggerChange();
+
+    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', 'A\'']]), {});
+    expect(errorHandler).not.toHaveBeenCalled();
 });
