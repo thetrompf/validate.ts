@@ -9,7 +9,7 @@
             }
         ],
         "no-underscore-dangle": [
-            false
+            0
         ]
     }
 }
