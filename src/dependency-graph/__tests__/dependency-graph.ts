@@ -3,6 +3,11 @@ import {
 } from 'dependency-graph/__mocks__/graph';
 
 import {
+    GraphCycleError,
+    NoSuchNodeGraphError,
+} from 'dependency-graph/errors';
+
+import {
     Graph,
 } from 'dependency-graph/graph';
 
@@ -23,7 +28,7 @@ test('getNodeData retuns data attached to the node via addNode', () => {
 test('getNodeData throws when node does not exist', () => {
     const graph = new Graph<string, void>();
     const node = 'node';
-    expect(() => graph.getNodeData(node)).toThrowError("Node 'node' does not exist in graph");
+    expect(() => graph.getNodeData(node)).toThrowError(NoSuchNodeGraphError);
 });
 
 test('adding node that already exists is a no-op', () => {
@@ -52,7 +57,7 @@ test('setNodeData overwrites existing data on node', () => {
 test('setNodeData on node that does not exist throws', () => {
     const graph = new Graph<string, number>();
     const node = 'node';
-    expect(() => graph.setNodeData(node, 2)).toThrowError("Node 'node' does not exist in graph");
+    expect(() => graph.setNodeData(node, 2)).toThrowError(NoSuchNodeGraphError);
 });
 
 test('adding dependency adds incoming and outgoing edges', () => {
@@ -87,7 +92,7 @@ test('adding dependency where the "from" node does not exist throws', () => {
     const node2 = 'node2';
 
     graph.addNode(node2, 2);
-    expect(() => graph.addDependency(node1, node2)).toThrowError("Node 'node1' does not exist in graph");
+    expect(() => graph.addDependency(node1, node2)).toThrowError(NoSuchNodeGraphError);
 });
 
 test('adding dependency where "to" node does not exist throws', () => {
@@ -96,7 +101,7 @@ test('adding dependency where "to" node does not exist throws', () => {
     const node2 = 'node2';
 
     graph.addNode(node1, 1);
-    expect(() => graph.addDependency(node1, node2)).toThrowError("Node 'node2' does not exist in graph");
+    expect(() => graph.addDependency(node1, node2)).toThrowError(NoSuchNodeGraphError);
 });
 
 test('adding a dependency that already exists is a no-op', () => {
@@ -300,13 +305,13 @@ test('dependantsOf returns all nodes that are depending on the node itself', () 
 test('resolving dependencies of a node that does not exist throws', () => {
     const graph = new Graph<string, number>();
     const node = 'node';
-    expect(() => graph.dependenciesOf(node)).toThrowError("Node 'node' does not exist in graph");
+    expect(() => graph.dependenciesOf(node)).toThrowError(NoSuchNodeGraphError);
 });
 
 test('resolving dependants of a node that does not exist throws', () => {
     const graph = new Graph<string, number>();
     const node = 'node';
-    expect(() => graph.dependantsOf(node)).toThrowError("Node 'node' does not exist in graph");
+    expect(() => graph.dependantsOf(node)).toThrowError(NoSuchNodeGraphError);
 });
 
 test('resolving dependencies in a graph that has cycle(s) throws', () => {
@@ -325,7 +330,7 @@ test('resolving dependencies in a graph that has cycle(s) throws', () => {
     graph.addDependency(b, c);
     graph.addDependency(c, a);
 
-    expect(() => graph.dependenciesOf(b)).toThrowError('A cycle detected in the dependency graph');
+    expect(() => graph.dependenciesOf(b)).toThrowError(GraphCycleError);
 });
 
 test('resolving dependants in a graph that has cycle(s) throws', () => {
@@ -344,7 +349,7 @@ test('resolving dependants in a graph that has cycle(s) throws', () => {
     graph.addDependency(b, c);
     graph.addDependency(c, a);
 
-    expect(() => graph.dependantsOf(b)).toThrowError('A cycle detected in the dependency graph');
+    expect(() => graph.dependantsOf(b)).toThrowError(GraphCycleError);
 });
 
 test('overallOrder returns a legal execution path for graphs with disconnected sub graphs', () => {
