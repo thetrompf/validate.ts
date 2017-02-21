@@ -7,6 +7,11 @@ define(['require', 'validate'], (require, _validate) => {
         throw new Error('Couldn\'t find form or submit button');
     }
 
+    const changeListeners = {
+        name: null,
+        username: null,
+    };
+
     const formFieldMap = {
         name: document.getElementById('name'),
         username: document.getElementById('username'),
@@ -41,12 +46,6 @@ define(['require', 'validate'], (require, _validate) => {
         }
     };
 
-    const addErrors = (errors) => {
-        for (const fieldErrors of Array.from(errors.errors)) {
-            addErrorsToField(fieldErrors[0], fieldErrors[1]);
-        }
-    };
-
     submitButton.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -57,16 +56,26 @@ define(['require', 'validate'], (require, _validate) => {
         {
             name: {
                 getValue: () => formFieldMap.name.value,
+                addListener: (event, ...args) => {
+                    changeListeners.name = args[0];
+                    args.unshift(event === 'change' ? 'input' : event);
+                    return formFieldMap.name.addEventListener.call(formFieldMap.name, ...args);
+                },
             },
             username: {
                 getValue: () => formFieldMap.username.value,
+                addListener: (event, ...args) => {
+                    changeListeners.username = args[0];
+                    args.unshift(event === 'change' ? 'input' : event);
+                    return formFieldMap.username.addEventListener.call(formFieldMap.username, ...args);
+                },
             },
         }, {
             name: {
                 validators: [
                     (value) => {
                         if (value.length <= 5) {
-                            return Promise.reject(new ValidationError('Name must contain 5 chars or more'));
+                            return Promise.reject(new ValidationError(`Name is ${5 - value.length + 1} char(s) too short.`));
                         }
                         return Promise.resolve(null);
                     },
@@ -76,14 +85,14 @@ define(['require', 'validate'], (require, _validate) => {
                 validators: [
                     (value) => {
                         if (value.length < 7) {
-                            return Promise.reject(new ValidationError('Username must contain 7 chars or more'));
+                            return Promise.reject(new ValidationError(`Username is ${7 - value.length + 1} char(s) too short.`));
                         }
                         return Promise.resolve(null);
                     },
                     (value) => {
-                        if (value.indexOf('@') === -1 || value.indexOf('.') === -1) {
-                            // poor man's email validator.
-                            return Promise.reject(new ValidationError('Username must be a valid email address'));
+                        // poor man's email validator.
+                        if (!/[a-z0-9_.+-]+@[a-z0-9_.-]+\.[a-z]+/i.test(value)) {
+                            return Promise.reject(new ValidationError('Username must be a valid email address.'));
                         }
                         return Promise.resolve(null);
                     },
@@ -91,7 +100,27 @@ define(['require', 'validate'], (require, _validate) => {
             },
         },
         (e) => {
-            addErrors(e);
+            for (const field in formFieldMap) {
+                const errors = e.errors.get(field);
+                if (errors) {
+                    addErrorsToField(field, errors);
+                } else {
+                    clearError(field);
+                }
+            }
         }
     );
+
+    formFieldMap.name.addEventListener('focus', () => {
+        if (typeof changeListeners.name === 'function') {
+            changeListeners.name();
+        }
+    }, true);
+    formFieldMap.username.addEventListener('focus', () => {
+        if (typeof changeListeners.username === 'function') {
+            changeListeners.username();
+        }
+    }, true);
+
+    formFieldMap.name.focus();
 });

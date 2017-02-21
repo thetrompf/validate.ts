@@ -61,7 +61,7 @@ async function getPromisedDependencyMap<TValues extends FieldObservables>(
     return map;
 }
 
-interface LiveValidationErrorHandler {
+interface LiveValidationChangeHandler {
     (e: any): void;
 }
 
@@ -73,7 +73,7 @@ interface LiveValidationErrorHandler {
 function getErrorHandlerForNode<TValues>(
     node: keyof TValues,
     errors: ValidationAggregateError<TValues>,
-): LiveValidationErrorHandler {
+): LiveValidationChangeHandler {
     return function (e: any): void {
         if (e instanceof ValidationError) {
             errors.add(node, e);
@@ -94,7 +94,7 @@ async function validateNode<TValues extends FieldObservables>(
     graph: Graph<keyof TValues, ConstraintSpecification<TValues> | undefined>,
     dependencyMap: Map<keyof TValues, Set<keyof TValues>>,
     errors: ValidationAggregateError<TValues>,
-    errorHandler: LiveValidationErrorHandler,
+    globalChangeCallback: LiveValidationChangeHandler,
 ): Promise<void> {
 
     const validateDendencies = () => {
@@ -152,7 +152,7 @@ async function validateNode<TValues extends FieldObservables>(
                 return Promise.race([
                     dependantValidationTimeout,
                     validate(value, dependencies, {})
-                        .catch(errorHandler),
+                        .catch(globalChangeCallback),
                 ]);
 
             })).then(() => {
@@ -166,8 +166,8 @@ async function validateNode<TValues extends FieldObservables>(
                 return validateDendencies();
             });
         });
-    }, errorHandler)
-        .catch(errorHandler);
+    }, globalChangeCallback)
+        .catch(globalChangeCallback);
 }
 
 /**
@@ -221,24 +221,25 @@ function validateDependenciesFor<TValues extends FieldObservables>(
 function unwrapErrors<TValues>(
     validationPromise: Promise<any>,
     errors: ValidationAggregateError<TValues>,
-    errorHandler: ValidationErrorHandler<TValues>,
-    changeCallback?: Function,
+    globalChangeCallback: ValidationErrorHandler<TValues>,
+    localChangeCallback?: Function,
 ): Promise<void> {
     return validationPromise.then(() => {
-        if (errors.length !== 0) {
-            errorHandler(errors);
-        }
+        globalChangeCallback(errors);
 
-        if (changeCallback != null) {
+        if (typeof localChangeCallback === 'function') {
             if (errors.length === 0) {
-                changeCallback();
+                localChangeCallback();
             } else {
-                changeCallback(errors);
+                localChangeCallback(errors);
             }
         }
     }, (e) => {
-        if (changeCallback != null) {
-            changeCallback(e);
+        if (typeof localChangeCallback === 'function') {
+            localChangeCallback(e);
+            if (e instanceof ValidationError) {
+                globalChangeCallback(errors);
+            }
         }
     });
 }
@@ -259,7 +260,7 @@ function unwrapErrors<TValues>(
 export function liveValidate<TValues extends FieldObservables>(
     nodes: TValues,
     constraints: Constraints<TValues>,
-    errorHandler: ValidationErrorHandler<TValues>,
+    globalChangeCallback: ValidationErrorHandler<TValues>,
 ): SubscriptionCanceller {
     let isSubscriptionActive = true;
 
@@ -275,10 +276,10 @@ export function liveValidate<TValues extends FieldObservables>(
     addAllConstraints(graph, keys, dependencyMap);
 
     // define the generic node change handler.
-    const handleChanges = (node: keyof TValues) => (changeCallback?: Function) => {
+    const handleChanges = (node: keyof TValues) => (localChangeCallback?: Function) => {
         if (!isSubscriptionActive) {
-            if (changeCallback != null) {
-                changeCallback();
+            if (typeof localChangeCallback === 'function') {
+                localChangeCallback();
             }
             return;
         }
@@ -310,8 +311,8 @@ export function liveValidate<TValues extends FieldObservables>(
             unwrapErrors(
                 Promise.all(promises),
                 errors,
-                errorHandler,
-                changeCallback,
+                globalChangeCallback,
+                localChangeCallback,
             );
 
         } else {
@@ -331,8 +332,8 @@ export function liveValidate<TValues extends FieldObservables>(
             unwrapErrors(
                 validationPromise,
                 errors,
-                errorHandler,
-                changeCallback,
+                globalChangeCallback,
+                localChangeCallback,
             );
         }
     };

@@ -16,7 +16,7 @@ test('live validators are called when field emits change', async () => {
     expect.assertions(2);
 
     const field1 = new Field('value1');
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     liveValidate(
         {
@@ -30,18 +30,18 @@ test('live validators are called when field emits change', async () => {
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     field1.setValue('value2');
     await field1.triggerChange();
 
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('validators won\'t be called after subscriptions are cancelled', async () => {
     const field1 = new Field('value1');
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     let validatorCalled = 0;
 
@@ -57,7 +57,7 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     await field1.triggerChange();
@@ -68,14 +68,14 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
     await field1.triggerChange();
     expect(validatorCalled).toBe(1);
 
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('promised values are resolved when passed to validators', async () => {
     expect.assertions(2);
 
     const field1 = new FieldAsync('async-value1');
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     liveValidate(
         {
@@ -89,12 +89,12 @@ test('promised values are resolved when passed to validators', async () => {
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     await field1.triggerChange();
 
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('dependant nodes validators are run when node trigger change', async () => {
@@ -102,7 +102,7 @@ test('dependant nodes validators are run when node trigger change', async () => 
     const field1 = new Field('value1');
     const field2 = new Field('value2');
 
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
     const field2Validator = jest.fn();
 
     field2Validator.mockReturnValue(Promise.resolve());
@@ -119,14 +119,14 @@ test('dependant nodes validators are run when node trigger change', async () => 
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     field1.setValue('new-value1');
     await field1.triggerChange();
 
     expect(field2Validator).toHaveBeenCalledWith('value2', new Map([['field1', 'new-value1']]), {});
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('when dependant nodes fail errors are propagated to error handler', async () => {
@@ -220,7 +220,7 @@ test('node with both constraints and dependants, calls dependants validators whe
 
     const field1Validator = jest.fn();
     const field2Validator = jest.fn();
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     field1Validator.mockReturnValue(Promise.resolve());
     field2Validator.mockReturnValue(Promise.resolve());
@@ -242,7 +242,7 @@ test('node with both constraints and dependants, calls dependants validators whe
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     field1.setValue('new-value1');
@@ -250,7 +250,7 @@ test('node with both constraints and dependants, calls dependants validators whe
 
     expect(field1Validator).toHaveBeenCalledWith('new-value1', new Map(), {});
     expect(field2Validator).toHaveBeenCalledWith('value2', new Map([['field1', 'new-value1']]), {});
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('validators beyond dependency level 2 is called', async () => {
@@ -263,7 +263,7 @@ test('validators beyond dependency level 2 is called', async () => {
     const bValidator = jest.fn();
     const cValidator = jest.fn();
     const dValidator = jest.fn();
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     aValidator.mockReturnValue(Promise.resolve());
     bValidator.mockReturnValue(Promise.resolve());
@@ -301,7 +301,7 @@ test('validators beyond dependency level 2 is called', async () => {
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     a.setValue('A\'');
@@ -312,7 +312,7 @@ test('validators beyond dependency level 2 is called', async () => {
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).toHaveBeenCalledWith('D', new Map([['c', 'C']]), {});
 
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('validators beyond 2nd level of dependency breaks the dependency chain', async () => {
@@ -325,7 +325,7 @@ test('validators beyond 2nd level of dependency breaks the dependency chain', as
     const bValidator = jest.fn();
     const cValidator = jest.fn();
     const dValidator = jest.fn();
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     aValidator.mockReturnValue(Promise.resolve());
     bValidator.mockReturnValue(Promise.resolve());
@@ -363,7 +363,7 @@ test('validators beyond 2nd level of dependency breaks the dependency chain', as
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     a.setValue('A\'');
@@ -374,7 +374,7 @@ test('validators beyond 2nd level of dependency breaks the dependency chain', as
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).not.toHaveBeenCalled();
 
-    expect(errorHandler).toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
 
 test('dependant validators is run even if no validators defined on first level in the graph', async () => {
@@ -382,7 +382,7 @@ test('dependant validators is run even if no validators defined on first level i
     const b = new Field('B');
 
     const bValidator = jest.fn();
-    const errorHandler = jest.fn();
+    const changeHandler = jest.fn();
 
     bValidator.mockReturnValue(Promise.resolve());
 
@@ -401,12 +401,12 @@ test('dependant validators is run even if no validators defined on first level i
                 ],
             },
         },
-        errorHandler,
+        changeHandler,
     );
 
     a.setValue('A\'');
     await a.triggerChange();
 
     expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', 'A\'']]), {});
-    expect(errorHandler).not.toHaveBeenCalled();
+    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
 });
