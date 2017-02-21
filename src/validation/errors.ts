@@ -2,14 +2,20 @@
 /**
  * The base validation error.
  */
-export class ValidationError extends Error {
-
+export class ValidationError {
+    public readonly message: string | undefined;
+    constructor(message?: string) {
+        this.message = message;
+    }
 }
 
 /**
  * This error is thrown if a validation exceeds the `VALIDATION_TIMEOUT`.
  */
 export class ValidationTimeoutError extends ValidationError {
+    constructor(message?: string) {
+        super(message);
+    }
 
 }
 
@@ -18,7 +24,9 @@ export class ValidationTimeoutError extends ValidationError {
  * when the special `required` constraint is violated.
  */
 export class RequiredValidationError extends ValidationError {
-
+    constructor(message?: string) {
+        super(message);
+    }
 }
 
 /**
@@ -28,8 +36,8 @@ export class ValidationAggregateError<TValues> extends ValidationError {
 
     private _errors: Map<keyof TValues, ValidationError[]>;
 
-    public constructor() {
-        super();
+    public constructor(message?: string) {
+        super(message);
         this._errors = new Map();
     }
 

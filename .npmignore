@@ -9,6 +9,7 @@
 .vscode/
 build/
 coverage/
+examples/
 src/**/__mocks__/
 src/**/__tests__/
 

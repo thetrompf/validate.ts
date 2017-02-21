@@ -3,10 +3,13 @@
     "compilerOptions": {
         "module": "amd",
         "lib": [
+            "dom",
             "es2015"
         ],
         "outFile": "dist/amd/validate.js",
         "sourceMap": false,
+        "noEmitHelpers": false,
+        "importHelpers": false,
         "target": "es5"
     }
 }

@@ -1,4 +1,8 @@
 export {
+    ValidationError,
+} from 'validation/errors';
+
+export {
     liveValidate,
 } from 'validation/live-validate';
 
