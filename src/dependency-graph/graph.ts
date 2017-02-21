@@ -165,6 +165,12 @@ export class Graph<TNode, TData> {
         }
     }
 
+    /**
+     * Return the outgoing edges of the `node`
+     *
+     * If `node` does not exist in the graph
+     *     a `NoSuchNodeGraphError` is thrown.
+     */
     public immediateDependenciesOf(node: TNode): Set<TNode> {
         if (this.nodes.has(node)) {
             return this.outgoingEdges.get(node) as Set<TNode>;

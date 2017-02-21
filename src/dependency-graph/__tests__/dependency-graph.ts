@@ -405,3 +405,38 @@ test('overallOrder returns a legal execution path for graphs with disconnected s
         Array.from(graph.overallOrder())
     ).toEqual([f, b, c, a, e, h, d, g, m, l, k, i, j]);
 });
+
+test('resolving immediate dependencies of node', () => {
+    const graph = new Graph<string, void>();
+
+    const a = 'A';
+    const b = 'B';
+    const c = 'C';
+    const d = 'D';
+    const e = 'E';
+
+    const data = undefined;
+
+    graph.addNode(a, data);
+    graph.addNode(b, data);
+    graph.addNode(c, data);
+    graph.addNode(d, data);
+    graph.addNode(e, data);
+
+    graph.addDependency(a, b);
+    graph.addDependency(a, c);
+    graph.addDependency(b, d);
+    graph.addDependency(b, e);
+
+    expect(
+        Array.from(graph.immediateDependenciesOf(a))
+    ).toEqual([b, c]);
+
+    expect(
+        Array.from(graph.immediateDependenciesOf(b))
+    ).toEqual([d, e]);
+
+    expect(
+        Array.from(graph.immediateDependenciesOf(c))
+    ).toHaveLength(0);
+});
