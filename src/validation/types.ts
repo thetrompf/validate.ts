@@ -54,7 +54,7 @@ export interface FieldObservables {
     [field: string]: ValueProvider;
 }
 
-export interface SubscriptionAborter {
+export interface SubscriptionCanceller {
     (): void;
 }
 

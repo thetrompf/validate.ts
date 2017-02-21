@@ -22,7 +22,7 @@ export class Field extends EventEmitter {
     public triggerChange(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const listerners = this.emit('change', (err?: any) => {
-                err == null ? resolve() : reject(err);
+                resolve(err);
             });
 
             if (!listerners) {
