@@ -41,11 +41,12 @@
             "<rootDir>/lib/",
             "<rootDir>/lib2015/"
         ],
+        "testEnvironment": "node",
+        "testRegex": "/__tests__/.*\\.ts$",
+        "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js",
         "transform": {
             ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-        },
-        "testEnvironment": "node",
-        "testRegex": "/__tests__/.*\\.ts$"
+        }
     },
     "license": "BSD-3-Clause",
     "main": "lib/validate.js",
@@ -55,20 +56,24 @@
         "_build-dist-amd": "tsc -p tsconfig.dist.amd.json",
         "_build-dist-system": "tsc -p tsconfig.dist.system.json",
         "_clean-build": "rm -Rf build/",
+        "_clean-coverage": "rm -Rf coverage/",
         "_clean-dist-amd": "rm -Rf dist/amd/",
         "_clean-dist-system": "rm -Rf dist/system/",
+        "_clean-dist": "rm -Rf dist",
         "_clean-lib-commonjs": "rm -Rf lib/",
         "_clean-lib-es2015": "rm -Rf lib2015/",
-        "clean": "yarn _clean-dist-amd && yarn _clean-dist-system && yarn _clean-lib-commonjs && yarn _clean-lib-es2015 && yarn _clean-build",
+        "_clean-lib": "yarn run _clean-lib-commonjs && yarn run _clean-lib-es2015",
         "build-dist-amd": "yarn _clean-dist-amd && yarn _build-dist-amd && yarn compress-dist-amd",
         "build-dist-system": "yarn _clean-dist-system && yarn _build-dist-system && yarn compress-dist-system",
+        "build-dist": "yarn build-dist-amd && yarn build-dist-system",
         "build-lib-commonjs": "yarn _clean-lib-commonjs && tsc -p tsconfig.lib.commonjs.json",
         "build-lib-es2015": "yarn _clean-lib-es2015 && tsc -p tsconfig.lib.es2015.json",
         "build-source": "yarn _clean-build && tsc -p tsconfig.json",
         "build": "yarn build-dist-amd && yarn build-dist-system && yarn build-lib-commonjs && yarn build-lib-es2015",
+        "clean": "yarn _clean-build && yarn _clean-coverage && yarn _clean-dist && yarn _clean-lib",
         "compress-dist-amd": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/amd/validate.min.js -- dist/amd/validate.js",
         "compress-dist-system": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/system/validate.min.js -- dist/system/validate.js",
-        "coverage": "rm -Rf coverage; jest --coverage",
+        "coverage": "yarn _clean-coverage && jest --coverage",
         "lint": "tslint .",
         "test": "jest"
     },
