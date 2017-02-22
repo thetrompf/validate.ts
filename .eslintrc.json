@@ -1,6 +1,16 @@
 {
     "extends": "airbnb",
     "rules": {
+        "comma-dangle": [
+            "errors",
+            {
+                "arrays": "always-multiline",
+                "objects": "always-multiline",
+                "imports": "always-multiline",
+                "exports": "always-multiline",
+                "functions": "ignore"
+            }
+        ],
         "indent": [
             "error",
             4,
