@@ -1,3 +1,10 @@
+## 2.0.0 (February 23, 2017)
+* Complex live validation is now possible,
+  we now have the same power of expression as the static validation (#1, #2, !1)
+* Added DOM helpers, to remove some boilerplate when validating HTML forms (#6, !2)
+* **Breaking change**: `errorHandler` in live validation becomes `changeMap`,
+  not only errors are emitted now, all touched nodes and their error state is returned. (!2)
+
 ## 1.0.2 (February 16, 2017)
 * Regression: fix error in build process.
   Don't depend on yarn in npm scripts
