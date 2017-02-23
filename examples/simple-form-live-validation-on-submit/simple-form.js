@@ -107,7 +107,7 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                     validators: [
                         (value) => {
                             if (value.length <= 5) {
-                                return Promise.reject(new ValidationError(`Name is ${5 - value.length + 1} char(s) too short.`));
+                                return Promise.reject(new ValidationError(`Name is ${5 - value.length} char(s) too short.`));
                             }
                             return Promise.resolve(null);
                         },
@@ -117,7 +117,7 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                     validators: [
                         (value) => {
                             if (value.length < 7) {
-                                return Promise.reject(new ValidationError(`Username is ${7 - value.length + 1} char(s) too short.`));
+                                return Promise.reject(new ValidationError(`Username is ${7 - value.length} char(s) too short.`));
                             }
                             return Promise.resolve(null);
                         },
@@ -134,7 +134,7 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                     validators: [
                         (value) => {
                             if (value.length < 8) {
-                                return Promise.reject(new ValidationError(`Password is ${8 - value.length + 1} char(s) too short.`));
+                                return Promise.reject(new ValidationError(`Password is ${8 - value.length} char(s) too short.`));
                             }
                             return Promise.resolve(null);
                         },
@@ -171,14 +171,13 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                 },
             },
             (e) => {
-                for (const field in formFieldMap) {
-                    const errors = e.errors.get(field);
-                    if (errors) {
-                        addErrorsToField(field, errors);
-                    } else {
+                e.forEach((errors, field) => {
+                    if (errors.length == 0) {
                         clearError(field);
+                    } else {
+                        addErrorsToField(field, errors);
                     }
-                }
+                });
             }
         );
 

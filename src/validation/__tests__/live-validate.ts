@@ -8,9 +8,12 @@ import {
 } from 'validation/live-validate';
 
 import {
-    ValidationAggregateError,
     ValidationError,
 } from 'validation/errors';
+
+import {
+    LiveValidationChangeMap,
+} from 'validation/utils';
 
 test('live validators are called when field emits change', async () => {
     expect.assertions(2);
@@ -36,7 +39,7 @@ test('live validators are called when field emits change', async () => {
     field1.setValue('value2');
     await field1.triggerChange();
 
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('validators won\'t be called after subscriptions are cancelled', async () => {
@@ -68,7 +71,7 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
     await field1.triggerChange();
     expect(validatorCalled).toBe(1);
 
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('promised values are resolved when passed to validators', async () => {
@@ -94,7 +97,7 @@ test('promised values are resolved when passed to validators', async () => {
 
     await field1.triggerChange();
 
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('dependant nodes validators are run when node trigger change', async () => {
@@ -126,7 +129,7 @@ test('dependant nodes validators are run when node trigger change', async () => 
     await field1.triggerChange();
 
     expect(field2Validator).toHaveBeenCalledWith('value2', new Map([['field1', 'new-value1']]), {});
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('when dependant nodes fail errors are propagated to error handler', async () => {
@@ -150,9 +153,9 @@ test('when dependant nodes fail errors are propagated to error handler', async (
                 ],
             },
         },
-        errors => {
-            expect(errors.length).toBe(1);
-            const field2Errors = errors.errors.get('field2') as ValidationError[];
+        changes => {
+            expect(changes.hasErrors).toBe(true);
+            const field2Errors = changes.getErrorsForNode('field2') as ValidationError[];
             expect(field2Errors).not.toBeUndefined();
             expect(field2Errors.length).toBe(1);
             expect(field2Errors[0].message).toBe('invalid value');
@@ -198,9 +201,9 @@ test('when a node validation fails, dependant nodes validators are not called', 
             },
         },
         errors => {
-            expect(errors.length).toBe(1);
-            const field1Errors = errors.errors.get('field1') as ValidationError[];
-            const field2Errors = errors.errors.get('field2') as ValidationError[];
+            expect(errors.hasErrors).toBe(true);
+            const field1Errors = errors.getErrorsForNode('field1') as ValidationError[];
+            const field2Errors = errors.getErrorsForNode('field2') as ValidationError[];
             expect(field2Errors).toBeUndefined();
             expect(field1Errors.length).toBe(1);
             expect(field1Errors[0].message).toBe('invalid value');
@@ -250,7 +253,7 @@ test('node with both constraints and dependants, calls dependants validators whe
 
     expect(field1Validator).toHaveBeenCalledWith('new-value1', new Map(), {});
     expect(field2Validator).toHaveBeenCalledWith('value2', new Map([['field1', 'new-value1']]), {});
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('validators beyond dependency level 2 is called', async () => {
@@ -312,7 +315,7 @@ test('validators beyond dependency level 2 is called', async () => {
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).toHaveBeenCalledWith('D', new Map([['c', 'C']]), {});
 
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('validators beyond 2nd level of dependency breaks the dependency chain', async () => {
@@ -374,7 +377,7 @@ test('validators beyond 2nd level of dependency breaks the dependency chain', as
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).not.toHaveBeenCalled();
 
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('dependant validators is run even if no validators defined on first level in the graph', async () => {
@@ -408,5 +411,159 @@ test('dependant validators is run even if no validators defined on first level i
     await a.triggerChange();
 
     expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', 'A\'']]), {});
-    expect(changeHandler).toHaveBeenCalledWith(new ValidationAggregateError());
+    expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
+});
+
+test('when a field triggers change, it exists in change map, with empty list of errors', async () => {
+    expect.assertions(1);
+    const a = new Field('A');
+    liveValidate(
+        { a: a },
+        {},
+        (e) => {
+            expect(e.getErrorsForNode('a')).toHaveLength(0);
+        }
+    );
+
+    a.setValue('A\'');
+    return a.triggerChange();
+});
+
+test('when a field passes its validation, it exists in change map, with empty list of errors', async () => {
+    expect.assertions(2);
+
+    const a = new Field('A');
+    const aValidator = jest.fn();
+    aValidator.mockReturnValue(Promise.resolve());
+
+    liveValidate(
+        {
+            a: a,
+        },
+        {
+            a: {
+                validators: [
+                    aValidator,
+                ],
+            },
+        },
+        (e) => {
+            expect(e.getErrorsForNode('a')).toHaveLength(0);
+        }
+    );
+
+    a.setValue('A\'');
+    await a.triggerChange();
+
+    expect(aValidator).toHaveBeenCalledWith('A\'', new Map, {});
+});
+
+test('when a field triggers change and has dependants, they appear in the change map', async () => {
+    expect.assertions(4);
+
+    const a = new Field('A');
+    const b = new Field('B');
+
+    liveValidate(
+        {
+            a: a,
+            b: b,
+        },
+        {
+            b: {
+                dependencies: ['a'],
+            }
+        },
+        (e) => {
+            expect(e.hasErrors).toBe(false);
+            expect(Array.from(e.keys())).toEqual(['a', 'b']);
+            expect(e.getErrorsForNode('a')).toEqual([]);
+            expect(e.getErrorsForNode('b')).toEqual([]);
+        },
+    );
+
+    a.setValue('A\'');
+    return a.triggerChange();
+});
+
+test('when a field fails its validations, its dependants does not appear in change map', async () => {
+    expect.assertions(3);
+
+    const a = new Field('A');
+    const b = new Field('B');
+
+    const aValidator = jest.fn();
+    aValidator.mockReturnValue(Promise.reject(new ValidationError('Nope!')));
+
+    liveValidate(
+        {
+            a: a,
+            b: b,
+        },
+        {
+            a: {
+                validators: [
+                    aValidator,
+                ],
+            },
+            b: {
+                dependencies: ['a'],
+            }
+        },
+        (e) => {
+            expect(e.hasErrors).toBe(true);
+            expect(Array.from(e.keys())).toEqual(['a']);
+            expect(e.getErrorsForNode('a')).toHaveLength(1);
+        },
+    );
+
+    a.setValue('A\'');
+    return a.triggerChange();
+});
+
+test('when field triggers change, if a later change triggers, and returns first, second return will not call change handler', async () => {
+    expect.assertions(6);
+
+    const a = new Field('A');
+
+    const aValidator = jest.fn();
+    aValidator
+        .mockReturnValueOnce(new Promise((resolve, reject) => {
+            setTimeout(reject, 30);
+        }))
+        .mockReturnValueOnce(new Promise((resolve, reject) => {
+            setTimeout(resolve, 10);
+        }));
+
+    liveValidate(
+        {
+            a: a,
+        },
+        {
+            a: {
+                validators: [
+                    aValidator,
+                ],
+            }
+        },
+        (e) => {
+            expect(e.hasErrors).toBe(false);
+            expect(Array.from(e.keys())).toEqual(['a']);
+            expect(e.getErrorsForNode('a')).toHaveLength(0);
+        },
+    );
+
+    const changePromises: Promise<void>[] = [];
+
+    a.setValue("A'");
+    changePromises.push(a.triggerChange());
+
+    a.setValue("A''");
+    changePromises.push(a.triggerChange());
+
+    await Promise.all(changePromises);
+
+    expect(aValidator).toHaveBeenCalledTimes(2);
+    expect(aValidator).toHaveBeenCalledWith("A'", new Map, {});
+    expect(aValidator).toHaveBeenCalledWith("A''", new Map, {});
 });

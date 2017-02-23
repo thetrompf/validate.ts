@@ -3,12 +3,14 @@ import {
 } from 'dependency-graph/graph';
 
 import {
+    ValidationError,
     ValidationTimeoutError,
 } from 'validation/errors';
 
 import {
     Constraints,
     FieldValuesObject,
+    LiveValidationChangeMap as ILiveValidationChangeMap,
 } from 'validation/types';
 
 /**
@@ -110,3 +112,93 @@ export function isEmpty(value: any): boolean {
             return false;
     }
 };
+
+
+/**
+ * The map object returned to the live validation change handler.
+ */
+export class LiveValidationChangeMap<TValues> implements ILiveValidationChangeMap<TValues, ValidationError> {
+    private _errors: Map<keyof TValues, ValidationError[]>;
+
+    public constructor() {
+        this._errors = new Map();
+    }
+
+    public values() {
+        return this._errors.values();
+    }
+
+    public entries() {
+        return this._errors.entries();
+    }
+
+    public keys() {
+        return this._errors.keys();
+    }
+
+    public getErrorsForNode(node: keyof TValues) {
+        return this._errors.get(node);
+    }
+
+    public getAllErrors() {
+        const errorMap = new Map<keyof TValues, ValidationError[]>();
+        this._errors.forEach((errors: ValidationError[], node: keyof TValues) => {
+            if (errors.length > 0) {
+                errorMap.set(node, errors);
+            }
+        });
+        return errorMap;
+    }
+
+    public forEach(
+        callbackFn: (
+            value: ValidationError[],
+            key: keyof TValues,
+            map: Map<keyof TValues, ValidationError[]>,
+        ) => void,
+        thisArg?: any
+    ): void {
+        this._errors.forEach(callbackFn, thisArg);
+    }
+
+    public get hasErrors(): boolean {
+        for (const errors of Array.from(this._errors.values())) {
+            if (errors.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public markNodeAsChanged(node: keyof TValues) {
+        if (!this._errors.has(node)) {
+            this._errors.set(node, []);
+        }
+    }
+
+    public addError(node: keyof TValues, error: ValidationError): void {
+        if (this._errors.has(node)) {
+            (this._errors.get(node) as ValidationError[]).push(error);
+        } else {
+            this._errors.set(node, [error]);
+        }
+    }
+
+    public toString(): string {
+        let result = `
+Field changes with errors:`;
+
+        this._errors.forEach((errors, node) => {
+            result += `
+  - ${node}:`;
+            if (errors.length > 0) {
+                result += `
+    ${errors.map(e => '*' + e.message)}`;
+            } else {
+                result += `
+    No errors`;
+            }
+        });
+        return result;
+    }
+}

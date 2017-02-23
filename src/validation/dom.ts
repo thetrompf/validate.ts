@@ -68,7 +68,6 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
     }
 
     const formMap: FormMap = {};
-    const values = {} as any;
     for (const fieldElement of Array.from(fieldElements)) {
         const editorElement = fieldElement.querySelector(resolvedOptions.editorSelector);
         if (editorElement == null) {
