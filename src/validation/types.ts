@@ -41,11 +41,18 @@ export interface ConstraintSpecification<T> {
     validators?: Validator<T>[];
 }
 
-export type Constraints<T> = {
+/**
+ * A map of constraints to hold up against `TValues`.
+ */
+export type Constraints<TValues> = {
     // tslint:disable-next-line:semicolon
-    [P in keyof T]?: ConstraintSpecification<T>;
+    [P in keyof TValues]?: ConstraintSpecification<TValues>;
 };
 
+/**
+ * The interface of both validation and non-validation
+ * errors that occurs during validation of a single node.
+ */
 export interface NodeValidationErrorHandler {
     (e: any): void;
 }
@@ -83,6 +90,10 @@ export interface FieldObservables {
     [field: string]: ValueProvider;
 }
 
+/**
+ * This interface represents the function returned from
+ * `liveValidate` to cancelled the current subscription.
+ */
 export interface SubscriptionCanceller {
     (): void;
 }

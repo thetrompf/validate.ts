@@ -82,6 +82,13 @@ function getErrorHandlerForNode<TValues>(
     };
 }
 
+interface ValidationNodeState {
+    version: number;
+    global: {
+        subscriptionIsActive: boolean,
+    };
+}
+
 /**
  * Run the validators of the `node`
  * and recursive through the dependencies.
@@ -94,6 +101,7 @@ async function validateNode<TValues extends FieldObservables>(
     dependencyMap: Map<keyof TValues, Set<keyof TValues>>,
     changeMap: LiveValidationChangeMap<TValues>,
     globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
+    nodeState: ValidationNodeState,
 ): Promise<void> {
 
     const validateDendencies = () => {
@@ -105,6 +113,7 @@ async function validateNode<TValues extends FieldObservables>(
                 graph,
                 dependencyMap,
                 changeMap,
+                nodeState,
             )
         ).then(__ => undefined);
     };
@@ -117,6 +126,10 @@ async function validateNode<TValues extends FieldObservables>(
     // in trade for a considered amount of performance.
     const constraint = constraints[node];
     if (constraint == undefined || constraint.validators == undefined) {
+        // Don't proceed if subscriptions has been cancelled.
+        if (!nodeState.global.subscriptionIsActive) {
+            return;
+        }
         // Run validation of the dependants of this node.
         return validateDendencies();
     }
@@ -127,8 +140,9 @@ async function validateNode<TValues extends FieldObservables>(
         values[node].getValue(),
     ]).then((value: any) => {
 
+        // No need to proceed if subscription are canclled.
         // No need for live-validate empty values.
-        if (isEmpty(value)) {
+        if (!nodeState.global.subscriptionIsActive || isEmpty(value)) {
             return;
         }
 
@@ -141,7 +155,7 @@ async function validateNode<TValues extends FieldObservables>(
             // This check has already been made,
             // but in async context the type checker
             // thinks it could have been mutated in the meantime.
-            if (constraint.validators == null) {
+            if (!nodeState.global.subscriptionIsActive || constraint.validators == null) {
                 return;
             }
 
@@ -158,8 +172,9 @@ async function validateNode<TValues extends FieldObservables>(
 
             })).then(() => {
 
-                // Opt-out of the chain if an error has occured.
-                if (changeMap.hasErrors) {
+                // Opt-out of the chain if an error has occured
+                // or
+                if (changeMap.hasErrors || !nodeState.global.subscriptionIsActive) {
                     return;
                 }
 
@@ -181,7 +196,14 @@ function validateDependenciesFor<TValues extends FieldObservables>(
     graph: Graph<keyof TValues, ConstraintSpecification<TValues> | undefined>,
     dependencyMap: Map<keyof TValues, Set<keyof TValues>>,
     changeMap: LiveValidationChangeMap<TValues>,
+    nodeState: ValidationNodeState,
 ): Promise<void>[] {
+
+    // Don't proceed if the subscriptions has been cancelled.
+    if (!nodeState.global.subscriptionIsActive) {
+        return [];
+    }
+
     const promises: Promise<void>[] = [];
     const dependants = graph.immediateDependenciesOf(node);
 
@@ -204,6 +226,7 @@ function validateDependenciesFor<TValues extends FieldObservables>(
                     dependencyMap,
                     changeMap,
                     dependantErrorsHandler,
+                    nodeState,
                 )
             );
         } else {
@@ -229,26 +252,26 @@ function unwrapErrors<TValues>(
     changeMap: LiveValidationChangeMap<TValues>,
     globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
     version: number,
-    nodeState: { version: number },
+    nodeState: ValidationNodeState,
     localChangeCallback?: Function,
 ): Promise<void> {
     return validationPromise.then(() => {
         if (typeof localChangeCallback === 'function') {
             if (changeMap.hasErrors) {
-                localChangeCallback();
-            } else {
                 localChangeCallback(changeMap);
+            } else {
+                localChangeCallback();
             }
         }
 
-        if (version === nodeState.version) {
+        if (version === nodeState.version && nodeState.global.subscriptionIsActive) {
             globalChangeCallback(changeMap);
         }
     }, (e) => {
         if (typeof localChangeCallback === 'function') {
             localChangeCallback(e);
         }
-        if (version === nodeState.version) {
+        if (version === nodeState.version && nodeState.global.subscriptionIsActive) {
             globalChangeCallback(changeMap);
         }
     });
@@ -272,13 +295,16 @@ export function liveValidate<TValues extends FieldObservables>(
     constraints: Constraints<TValues>,
     globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
 ): SubscriptionCanceller {
-    let isSubscriptionActive = true;
+
+    const globalState = {
+        subscriptionIsActive: true,
+    };
 
     const keys = Object.keys(nodes) as [keyof TValues];
     const graph = new Graph<keyof TValues, ConstraintSpecification<TValues> | undefined>();
 
     // keep track of subscriptions to make it easy to unhook change handlers.
-    const subsriptions = new Map<ValueProvider, LiveValueChangeHandler>();
+    const subscriptions = new Map<ValueProvider, LiveValueChangeHandler>();
 
     keys.forEach(key => graph.addNode(key, constraints[key]));
 
@@ -290,11 +316,12 @@ export function liveValidate<TValues extends FieldObservables>(
 
         // The internal state of validation local for this `node`.
         let currentState = {
+            global: globalState,
             version: 0,
         };
 
         return (localChangeCallback?: Function) => {
-            if (!isSubscriptionActive) {
+            if (!globalState.subscriptionIsActive) {
                 if (typeof localChangeCallback === 'function') {
                     localChangeCallback();
                 }
@@ -327,6 +354,7 @@ export function liveValidate<TValues extends FieldObservables>(
                     graph,
                     dependencyMap,
                     changeMap,
+                    currentState,
                 );
 
                 // decorate the validation promises.
@@ -350,6 +378,7 @@ export function liveValidate<TValues extends FieldObservables>(
                     dependencyMap,
                     changeMap,
                     keyValidationErrorsHandler,
+                    currentState,
                 );
 
                 // decorate the validation promise.
@@ -368,7 +397,7 @@ export function liveValidate<TValues extends FieldObservables>(
     for (const node in nodes) {
         const valueProvider = nodes[node];
         const keyChangeHandler = handleChanges(node);
-        subsriptions.set(valueProvider, keyChangeHandler);
+        subscriptions.set(valueProvider, keyChangeHandler);
         valueProvider.addListener('change', keyChangeHandler);
     }
 
@@ -376,14 +405,14 @@ export function liveValidate<TValues extends FieldObservables>(
     return () => {
 
         // support cancelling multiple times.
-        if (!isSubscriptionActive) {
+        if (!globalState.subscriptionIsActive) {
             return;
         }
 
-        isSubscriptionActive = false;
+        globalState.subscriptionIsActive = false;
 
         // remove all change handlers.
-        subsriptions.forEach((handler: LiveValueChangeHandler, valueProvider: ValueProvider) => {
+        subscriptions.forEach((handler: LiveValueChangeHandler, valueProvider: ValueProvider) => {
             valueProvider.removeListener('change', handler);
         });
 
