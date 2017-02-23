@@ -567,3 +567,84 @@ test('when field triggers change, if a later change triggers, and returns first,
     expect(aValidator).toHaveBeenCalledWith("A'", new Map, {});
     expect(aValidator).toHaveBeenCalledWith("A''", new Map, {});
 });
+
+test('when subscriptions are cancelled and a long running validation returns, the change handler is not called', async () => {
+    const a = new Field('A');
+
+    const aValidator = jest.fn();
+    const changeHandler = jest.fn();
+
+    aValidator.mockReturnValue(new Promise((resolve, reject) => {
+        setTimeout(resolve, 30);
+    }));
+
+    const cancelSubscriptions = liveValidate(
+        {
+            a: a,
+        },
+        {
+            a: {
+                validators: [
+                    aValidator,
+                ],
+            }
+        },
+        changeHandler,
+    );
+
+    a.setValue("A'");
+    const changePromise = a.triggerChange();
+
+    expect(changeHandler).not.toHaveBeenCalled();
+    cancelSubscriptions();
+
+    await changePromise;
+
+    expect(changeHandler).not.toHaveBeenCalled();
+});
+
+test('validators in *next* level in dependecy graph is not called when subscriptions are cancelled', async () => {
+    const a = new Field('A');
+    const b = new Field('B');
+
+    const aValidator = jest.fn();
+    const bValidator = jest.fn();
+    const changeHandler = jest.fn();
+
+    aValidator.mockReturnValue(new Promise((resolve, reject) => {
+        setTimeout(resolve, 30);
+    }));
+    bValidator.mockReturnValue(Promise.resolve());
+
+    const cancelSubscriptions = liveValidate(
+        {
+            a: a,
+            b: b,
+        },
+        {
+            a: {
+                validators: [
+                    aValidator,
+                ],
+            },
+            b: {
+                dependencies: ['a'],
+                validators: [
+                    bValidator,
+                ],
+            },
+        },
+        changeHandler,
+    );
+
+    a.setValue("A'");
+    const changePromise = a.triggerChange();
+
+    setTimeout(cancelSubscriptions, 0);
+
+    await changePromise;
+
+    expect(aValidator).toHaveBeenCalled();
+    expect(bValidator).not.toHaveBeenCalled();
+    expect(changeHandler).not.toHaveBeenCalled();
+});
