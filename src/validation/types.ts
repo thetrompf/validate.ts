@@ -46,6 +46,35 @@ export type Constraints<T> = {
     [P in keyof T]?: ConstraintSpecification<T>;
 };
 
+export interface NodeValidationErrorHandler {
+    (e: any): void;
+}
+
+export interface LiveValidationChangeMap<TValues, TError> {
+    addError(node: keyof TValues, error: TError): void;
+    entries(): IterableIterator<[keyof TValues, TError[]]>;
+    forEach(
+        callbackFn: (
+            value: TError[],
+            key: keyof TValues,
+            map: Map<keyof TValues, TError[]>,
+        ) => void,
+        thisArg?: any
+    ): void;
+    getErrorsForNode(node: keyof TValues): TError[] | undefined;
+    getAllErrors(): Map<keyof TValues, TError[]>;
+    readonly hasErrors: boolean;
+    keys(): IterableIterator<keyof TValues>;
+    markNodeAsChanged(node: keyof TValues): void;
+    values(): IterableIterator<TError[]>;
+    toString(): string;
+}
+
+
+export interface LiveValidationChangeHandler<TValues, TError> {
+    (e: LiveValidationChangeMap<TValues, TError>): void;
+}
+
 export interface ValueProvider extends EventEmitter {
     getValue(): any;
 }

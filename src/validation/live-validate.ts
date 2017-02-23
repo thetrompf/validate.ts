@@ -11,7 +11,9 @@ import {
     Constraints,
     ConstraintSpecification,
     FieldObservables,
+    LiveValidationChangeHandler,
     LiveValueChangeHandler,
+    NodeValidationErrorHandler,
     SubscriptionCanceller,
     ValidationErrorHandler,
     Validator,
@@ -22,6 +24,7 @@ import {
     addAllConstraints,
     buildDependencyMap,
     isEmpty,
+    LiveValidationChangeMap,
     validationTimeout,
 } from 'validation/utils';
 
@@ -61,10 +64,6 @@ async function getPromisedDependencyMap<TValues extends FieldObservables>(
     return map;
 }
 
-interface LiveValidationErrorHandler {
-    (e: any): void;
-}
-
 /**
  * Return an error handler for `node`
  * which adds errors to the aggregated `errors`,
@@ -72,11 +71,11 @@ interface LiveValidationErrorHandler {
  */
 function getErrorHandlerForNode<TValues>(
     node: keyof TValues,
-    errors: ValidationAggregateError<TValues>,
-): LiveValidationErrorHandler {
+    changeMap: LiveValidationChangeMap<TValues>,
+): NodeValidationErrorHandler {
     return function (e: any): void {
         if (e instanceof ValidationError) {
-            errors.add(node, e);
+            changeMap.addError(node, e);
             return;
         }
         throw e;
@@ -93,8 +92,8 @@ async function validateNode<TValues extends FieldObservables>(
     constraints: Constraints<TValues>,
     graph: Graph<keyof TValues, ConstraintSpecification<TValues> | undefined>,
     dependencyMap: Map<keyof TValues, Set<keyof TValues>>,
-    errors: ValidationAggregateError<TValues>,
-    errorHandler: LiveValidationErrorHandler,
+    changeMap: LiveValidationChangeMap<TValues>,
+    globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
 ): Promise<void> {
 
     const validateDendencies = () => {
@@ -105,10 +104,12 @@ async function validateNode<TValues extends FieldObservables>(
                 constraints,
                 graph,
                 dependencyMap,
-                errors,
+                changeMap,
             )
         ).then(__ => undefined);
     };
+
+    changeMap.markNodeAsChanged(node);
 
     // If no validation constraints is tied to the `node`
     // then opt-out early.
@@ -152,13 +153,13 @@ async function validateNode<TValues extends FieldObservables>(
                 return Promise.race([
                     dependantValidationTimeout,
                     validate(value, dependencies, {})
-                        .catch(errorHandler),
+                        .catch(globalChangeCallback),
                 ]);
 
             })).then(() => {
 
                 // Opt-out of the chain if an error has occured.
-                if (errors.length > 0) {
+                if (changeMap.hasErrors) {
                     return;
                 }
 
@@ -166,8 +167,8 @@ async function validateNode<TValues extends FieldObservables>(
                 return validateDendencies();
             });
         });
-    }, errorHandler)
-        .catch(errorHandler);
+    }, globalChangeCallback)
+        .catch(globalChangeCallback);
 }
 
 /**
@@ -179,7 +180,7 @@ function validateDependenciesFor<TValues extends FieldObservables>(
     constraints: Constraints<TValues>,
     graph: Graph<keyof TValues, ConstraintSpecification<TValues> | undefined>,
     dependencyMap: Map<keyof TValues, Set<keyof TValues>>,
-    errors: ValidationAggregateError<TValues>,
+    changeMap: LiveValidationChangeMap<TValues>,
 ): Promise<void>[] {
     const promises: Promise<void>[] = [];
     const dependants = graph.immediateDependenciesOf(node);
@@ -187,7 +188,7 @@ function validateDependenciesFor<TValues extends FieldObservables>(
     // loop through all immediate dependants of `node`
     // and run the validators in order.
     for (const dependant of Array.from(dependants.values())) {
-        const dependantErrorsHandler = getErrorHandlerForNode(dependant, errors);
+        const dependantErrorsHandler = getErrorHandlerForNode(dependant, changeMap);
 
         // validate all the nodes that has
         // validators described.
@@ -201,10 +202,15 @@ function validateDependenciesFor<TValues extends FieldObservables>(
                     constraints,
                     graph,
                     dependencyMap,
-                    errors,
+                    changeMap,
                     dependantErrorsHandler,
                 )
             );
+        } else {
+            // event though the dependant does not have
+            // any validators, in terms of live validation
+            // it should still appear in the change map.
+            changeMap.markNodeAsChanged(dependant);
         }
     }
 
@@ -220,25 +226,30 @@ function validateDependenciesFor<TValues extends FieldObservables>(
  */
 function unwrapErrors<TValues>(
     validationPromise: Promise<any>,
-    errors: ValidationAggregateError<TValues>,
-    errorHandler: ValidationErrorHandler<TValues>,
-    changeCallback?: Function,
+    changeMap: LiveValidationChangeMap<TValues>,
+    globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
+    version: number,
+    nodeState: { version: number },
+    localChangeCallback?: Function,
 ): Promise<void> {
     return validationPromise.then(() => {
-        if (errors.length !== 0) {
-            errorHandler(errors);
-        }
-
-        if (changeCallback != null) {
-            if (errors.length === 0) {
-                changeCallback();
+        if (typeof localChangeCallback === 'function') {
+            if (changeMap.hasErrors) {
+                localChangeCallback();
             } else {
-                changeCallback(errors);
+                localChangeCallback(changeMap);
             }
         }
+
+        if (version === nodeState.version) {
+            globalChangeCallback(changeMap);
+        }
     }, (e) => {
-        if (changeCallback != null) {
-            changeCallback(e);
+        if (typeof localChangeCallback === 'function') {
+            localChangeCallback(e);
+        }
+        if (version === nodeState.version) {
+            globalChangeCallback(changeMap);
         }
     });
 }
@@ -259,7 +270,7 @@ function unwrapErrors<TValues>(
 export function liveValidate<TValues extends FieldObservables>(
     nodes: TValues,
     constraints: Constraints<TValues>,
-    errorHandler: ValidationErrorHandler<TValues>,
+    globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
 ): SubscriptionCanceller {
     let isSubscriptionActive = true;
 
@@ -275,68 +286,84 @@ export function liveValidate<TValues extends FieldObservables>(
     addAllConstraints(graph, keys, dependencyMap);
 
     // define the generic node change handler.
-    const handleChanges = (node: keyof TValues) => (changeCallback?: Function) => {
-        if (!isSubscriptionActive) {
-            if (changeCallback != null) {
-                changeCallback();
+    const handleChanges = (node: keyof TValues) => {
+
+        // The internal state of validation local for this `node`.
+        let currentState = {
+            version: 0,
+        };
+
+        return (localChangeCallback?: Function) => {
+            if (!isSubscriptionActive) {
+                if (typeof localChangeCallback === 'function') {
+                    localChangeCallback();
+                }
+                return;
             }
-            return;
-        }
 
-        // instanciate the aggregated error
-        // to collect all validation errors in.
-        const errors = new ValidationAggregateError<TValues>();
+            const version = ++currentState.version;
 
-        // create error handler for current `node`.
-        const keyValidationErrorsHandler = getErrorHandlerForNode(node, errors);
+            // instanciate the aggregated error
+            // to collect all validation errors in.
+            const changeMap = new LiveValidationChangeMap<TValues>();
 
-        // retrieve the constraint for the node if any.
-        const constraint = constraints[node];
+            // create error handler for current `node`.
+            const keyValidationErrorsHandler = getErrorHandlerForNode(node, changeMap);
 
-        // if no constraints defined on `node`
-        // run the validators of its dependencies.
-        if (constraint == undefined) {
+            // retrieve the constraint for the node if any.
+            const constraint = constraints[node];
 
-            const promises = validateDependenciesFor(
-                node,
-                nodes,
-                constraints,
-                graph,
-                dependencyMap,
-                errors,
-            );
+            // if no constraints defined on `node`
+            // run the validators of its dependencies.
+            if (constraint == undefined) {
+                // mark this node for change,
+                // event though it has no constraints,
+                // it has still changed in temrs of live validation.
+                changeMap.markNodeAsChanged(node);
+                const promises = validateDependenciesFor(
+                    node,
+                    nodes,
+                    constraints,
+                    graph,
+                    dependencyMap,
+                    changeMap,
+                );
 
-            // decorate the validation promises.
-            unwrapErrors(
-                Promise.all(promises),
-                errors,
-                errorHandler,
-                changeCallback,
-            );
+                // decorate the validation promises.
+                unwrapErrors(
+                    Promise.all(promises),
+                    changeMap,
+                    globalChangeCallback,
+                    version,
+                    currentState,
+                    localChangeCallback,
+                );
 
-        } else {
+            } else {
 
-            // run the validators of the `node`.
-            const validationPromise = validateNode(
-                node,
-                nodes,
-                constraints,
-                graph,
-                dependencyMap,
-                errors,
-                keyValidationErrorsHandler,
-            );
+                // run the validators of the `node`.
+                const validationPromise = validateNode(
+                    node,
+                    nodes,
+                    constraints,
+                    graph,
+                    dependencyMap,
+                    changeMap,
+                    keyValidationErrorsHandler,
+                );
 
-            // decorate the validation promise.
-            unwrapErrors(
-                validationPromise,
-                errors,
-                errorHandler,
-                changeCallback,
-            );
-        }
+                // decorate the validation promise.
+                unwrapErrors(
+                    validationPromise,
+                    changeMap,
+                    globalChangeCallback,
+                    version,
+                    currentState,
+                    localChangeCallback,
+                );
+            }
+        };
     };
-
     // attach change listeners to all the nodes.
     for (const node in nodes) {
         const valueProvider = nodes[node];
