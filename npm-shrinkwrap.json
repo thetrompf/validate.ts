@@ -509,10 +509,6 @@
       "version": "0.2.37",
       "dev": true
     },
-    "currently-unhandled": {
-      "version": "0.4.1",
-      "dev": true
-    },
     "d": {
       "version": "0.1.1",
       "dev": true
@@ -992,10 +988,6 @@
         "duplexer2": {
           "version": "0.1.4",
           "dev": true
-        },
-        "readable-stream": {
-          "version": "2.0.6",
-          "dev": true
         }
       }
     },
@@ -1373,15 +1365,7 @@
           "version": "19.0.2",
           "dev": true
         },
-        "jest-environment-jsdom": {
-          "version": "19.0.2",
-          "dev": true
-        },
         "jest-environment-node": {
-          "version": "19.0.2",
-          "dev": true
-        },
-        "jest-jasmine2": {
           "version": "19.0.2",
           "dev": true
         },
@@ -1408,8 +1392,18 @@
       "dev": true
     },
     "jest-environment-jsdom": {
-      "version": "19.0.0",
-      "dev": true
+      "version": "19.0.2",
+      "dev": true,
+      "dependencies": {
+        "jest-util": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-validate": {
+          "version": "19.0.2",
+          "dev": true
+        }
+      }
     },
     "jest-environment-node": {
       "version": "19.0.0",
@@ -1428,14 +1422,8 @@
       "dev": true
     },
     "jest-jasmine2": {
-      "version": "19.0.0",
-      "dev": true,
-      "dependencies": {
-        "jest-snapshot": {
-          "version": "19.0.0",
-          "dev": true
-        }
-      }
+      "version": "19.0.2",
+      "dev": true
     },
     "jest-matcher-utils": {
       "version": "19.0.0",
@@ -1473,15 +1461,7 @@
           "version": "19.0.2",
           "dev": true
         },
-        "jest-environment-jsdom": {
-          "version": "19.0.2",
-          "dev": true
-        },
         "jest-environment-node": {
-          "version": "19.0.2",
-          "dev": true
-        },
-        "jest-jasmine2": {
           "version": "19.0.2",
           "dev": true
         },
@@ -1759,16 +1739,8 @@
       "version": "3.7.0",
       "dev": true,
       "dependencies": {
-        "loud-rejection": {
-          "version": "1.6.0",
-          "dev": true
-        },
         "minimist": {
           "version": "1.2.0",
-          "dev": true
-        },
-        "signal-exit": {
-          "version": "3.0.2",
           "dev": true
         }
       }
@@ -1785,16 +1757,8 @@
           "version": "2.2.4",
           "dev": true
         },
-        "loud-rejection": {
-          "version": "1.6.0",
-          "dev": true
-        },
         "minimist": {
           "version": "1.2.0",
-          "dev": true
-        },
-        "signal-exit": {
-          "version": "3.0.2",
           "dev": true
         },
         "update-notifier": {
@@ -2143,13 +2107,7 @@
     },
     "read-all-stream": {
       "version": "3.1.0",
-      "dev": true,
-      "dependencies": {
-        "readable-stream": {
-          "version": "2.0.6",
-          "dev": true
-        }
-      }
+      "dev": true
     },
     "read-pkg": {
       "version": "1.1.0",
@@ -2537,8 +2495,7 @@
       "dev": true
     },
     "tslib": {
-      "version": "1.6.0",
-      "dev": true
+      "version": "1.6.0"
     },
     "tslint": {
       "version": "4.4.2",
