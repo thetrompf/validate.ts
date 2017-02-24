@@ -1,7 +1,7 @@
 import {
     GraphCycleError,
     NoSuchEdgeGraphError,
-} from 'dependency-graph/errors';
+} from './errors';
 
 /**
  * The interface of a depth first search call.

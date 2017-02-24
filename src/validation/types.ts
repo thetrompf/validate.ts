@@ -4,7 +4,7 @@ import {
 
 import {
     ValidationAggregateError,
-} from 'validation/errors';
+} from './errors';
 
 /**
  * The interface of a validator function.

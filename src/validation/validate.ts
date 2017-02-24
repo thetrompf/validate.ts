@@ -1,20 +1,20 @@
 import {
     Graph,
-} from 'dependency-graph/graph';
+} from '../dependency-graph/graph';
 
 import {
     RequiredValidationError,
     ValidationAggregateError,
     ValidationError,
     ValidationTimeoutError,
-} from 'validation/errors';
+} from './errors';
 
 import {
     Constraints,
     ConstraintSpecification,
     FieldValuesObject,
     Validator,
-} from 'validation/types';
+} from './types';
 
 import {
     addAllConstraints,
@@ -23,7 +23,7 @@ import {
     getPromisedDependencyMap,
     isEmpty,
     validationTimeout,
-} from 'validation/utils';
+} from './utils';
 
 /**
  * Validate `values` against the `constraints` specification.

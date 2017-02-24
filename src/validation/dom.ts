@@ -1,13 +1,13 @@
 import {
     ValidationAggregateError,
     ValidationError,
-} from 'validation/errors';
+} from './errors';
 
 import {
     Constraints,
     LiveValidationChangeMap,
     ValueProvider,
-} from 'validation/types';
+} from './types';
 
 export type HTMLFormValueElement =
     | HTMLButtonElement

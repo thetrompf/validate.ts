@@ -1,11 +1,11 @@
 import {
     GraphError,
     NoSuchNodeGraphError,
-} from 'dependency-graph/errors';
+} from './errors';
 
 import {
     createDfs,
-} from 'dependency-graph/utils';
+} from './utils';
 
 /**
  * A simple class for modelling a

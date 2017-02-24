@@ -1,17 +1,17 @@
 import {
     Graph,
-} from 'dependency-graph/graph';
+} from '../dependency-graph/graph';
 
 import {
     ValidationError,
     ValidationTimeoutError,
-} from 'validation/errors';
+} from './errors';
 
 import {
     Constraints,
     FieldValuesObject,
     LiveValidationChangeMap as ILiveValidationChangeMap,
-} from 'validation/types';
+} from './types';
 
 /**
  * Add `dependencies` as outgoing edges from `node` in the `graph`.
@@ -81,7 +81,7 @@ export async function getPromisedDependencyMap<T>(values: FieldValuesObject, dep
 }
 
 /**
- * The threshold of when a validation times out.
+ * The threshold of when a validation .s out.
  */
 export const VALIDATION_TIMEOUT = 2000;
 

@@ -1,11 +1,11 @@
 import {
     Graph,
-} from 'dependency-graph/graph';
+} from '../dependency-graph/graph';
 
 import {
     ValidationAggregateError,
     ValidationError,
-} from 'validation/errors';
+} from './errors';
 
 import {
     Constraints,
@@ -18,7 +18,7 @@ import {
     ValidationErrorHandler,
     Validator,
     ValueProvider,
-} from 'validation/types';
+} from './types';
 
 import {
     addAllConstraints,
@@ -26,7 +26,7 @@ import {
     isEmpty,
     LiveValidationChangeMap,
     validationTimeout,
-} from 'validation/utils';
+} from './utils';
 
 /**
  * Return a map with all the values of the `dependencies` resolved,
