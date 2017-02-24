@@ -68,6 +68,7 @@ build:
 publish:
   dependencies:
   - build
+  image: docker.input-output.dk/docker/nodejs:7.5.0
   only:
   - tags
   - triggers
