@@ -32,6 +32,7 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                 formValidationObject.values,
                 {
                     'name': {
+                        required: true,
                         validators: [
                             (value) => {
                                 if (value.length <= 5) {
@@ -42,6 +43,7 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                         ],
                     },
                     'username': {
+                        required: true,
                         validators: [
                             (value) => {
                                 if (value.length < 7) {
@@ -59,6 +61,7 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                         ],
                     },
                     'password': {
+                        required: true,
                         validators: [
                             (value) => {
                                 if (value.length < 8) {
@@ -88,6 +91,7 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                     },
                     'password-repeat': {
                         dependencies: ['password'],
+                        required: true,
                         validators: [
                             (value, dependencies) => {
                                 if (value !== dependencies.get('password')) {
@@ -98,7 +102,7 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                         ],
                     },
                 }
-            ).catch(formValidationObject.setErrors);
+            ).catch(formValidationObject.setStaticErrors);
         });
     });
 });
