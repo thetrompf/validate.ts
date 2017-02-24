@@ -4,6 +4,7 @@ stages:
 - test
 - lint
 - build
+- deploy
 
 yarn:install:
   artifacts:
@@ -59,7 +60,21 @@ build:
     - yarn:install
   image: docker.input-output.dk/docker/nodejs:7.5.0
   script:
-  - yarn build
+  - yarn build --production
   stage: build
   tags:
   - kubernetes
+
+publish:
+  dependencies:
+  - build
+  only:
+  - tags
+  - triggers
+  script:
+  - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+  - npm publish
+  stage: deploy
+  tags:
+  - kubernetes
+  when: manual
