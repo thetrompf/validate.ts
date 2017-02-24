@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>Simple for example</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.js" integrity="sha256-pfoJwHEqXsAIyLrnSB6maCnMnFE6JMQ3sZtFUrnM99k=" crossorigin="anonymous" async data-main="simple-form.js"></script>
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js" integrity="sha256-4FF6zC8o0//sei6CJUD+MJIhewXKgcrV/iA/4HD4A8c=" crossorigin="anonymous" async data-main="simple-form.js"></script>-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.js" integrity="sha256-pfoJwHEqXsAIyLrnSB6maCnMnFE6JMQ3sZtFUrnM99k="
+        crossorigin="anonymous" async data-main="simple-form.js"></script>
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js" integrity="sha256-4FF6zC8o0//sei6CJUD+MJIhewXKgcrV/iA/4HD4A8c=" crossorigin="anonymous" async data-main="simple-form.js"></script>-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+            crossorigin="anonymous">
 </head>
+
 <body>
 
     <div class="container">
@@ -14,34 +18,44 @@
         <div class="row">
             <div class="col">
                 <form>
-                    <div class="form-group name">
+                    <div class="form-group">
                         <label class="sr-only" for="name">Name</label>
-                        <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="name" placeholder="Jane Doe" autocomplete="off" />
-                        <div class="form-control-feedback name"></div>
+                        <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" name="name" placeholder="Jane Doe" autocomplete="off" />
+                        <div class="form-control-feedback"></div>
                     </div>
-                    <div class="form-group username">
+                    <div class="form-group">
                         <label class="sr-only" for="username">Username</label>
                         <div class="input-group mb-2 mr-sm-2 mb-sm-0">
                             <div class="input-group-addon">@</div>
-                            <input type="text" class="form-control" id="username" placeholder="Username" autocomplete="off" />
+                            <input type="text" class="form-control" name="username" placeholder="Username" autocomplete="off" />
                         </div>
-                        <div class="form-control-feedback username"></div>
+                        <div class="form-control-feedback"></div>
                     </div>
-                    <div class="form-group password">
+                    <div class="form-group">
                         <label class="sr-only" for="password">Password</label>
-                        <input type="password" class="form-control mb-2 mr-sm-2 mb-sm-0" id="password" placeholder="Password" autocomplete="off" />
-                        <div class="form-control-feedback password"></div>
+                        <input type="password" class="form-control mb-2 mr-sm-2 mb-sm-0" name="password" placeholder="Password" autocomplete="off"
+                        />
+                        <div class="form-control-feedback"></div>
                     </div>
-                    <div class="form-group password-repeat">
+                    <div class="form-group">
                         <label class="sr-only" for="password-repeat">Password</label>
-                        <input type="password" class="form-control mb-2 mr-sm-2 mb-sm-0" id="password-repeat" placeholder="Repeat password" autocomplete="off" />
-                        <div class="form-control-feedback password-repeat"></div>
+                        <input type="password" class="form-control mb-2 mr-sm-2 mb-sm-0" name="password-repeat" placeholder="Repeat password" autocomplete="off"
+                        />
+                        <div class="form-control-feedback"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <div class="row">
+                        <div class="col">
+                            <button type="submit" class="btn btn-primary" role="button">Submit</button>
+                        </div>
+                        <div>
+                            <button type="reset" class="btn btn-danger" role="button">Reset</button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
 </body>
+
 </html>

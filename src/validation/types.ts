@@ -82,8 +82,10 @@ export interface LiveValidationChangeHandler<TValues, TError> {
     (e: LiveValidationChangeMap<TValues, TError>): void;
 }
 
-export interface ValueProvider extends EventEmitter {
+export interface ValueProvider {
     getValue(): any;
+    addListener(event: string, callback: (cb?: Function) => void): void;
+    removeListener(event: string, callback: (cb?: Function) => void): void;
 }
 
 export interface FieldObservables {
