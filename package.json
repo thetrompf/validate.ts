@@ -81,5 +81,5 @@
         "serve:examples": "serve --ignore='.vscode/,coverage/,dist/system/,node_modules/,src/,.eslintrc.json,.gitignore,.gitlab-ci.yml,.npmignore,CHANGELOG.md,LICENSE,README.md,npm-shrinkwrap.json,package.json,tsconfig.dist.amd.json,tsconfig.dist.system.json,tsconfig.json,tsconfig.lib.commonjs.json,tsconfig.lib.es2015.json,tsconfig.test.json,tslint.json,yarn.lock'",
         "test": "jest"
     },
-    "version": "2.0.0"
+    "version": "2.0.1"
 }

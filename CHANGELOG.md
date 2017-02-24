@@ -1,3 +1,6 @@
+## 2.0.1 (February 24, 2017)
+* Fix type mappings for npm package
+
 ## 2.0.0 (February 23, 2017)
 * Complex live validation is now possible,
   we now have the same power of expression as the static validation (#1, #2, !1)
