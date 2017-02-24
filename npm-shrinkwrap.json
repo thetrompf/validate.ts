@@ -1,6 +1,6 @@
 {
   "name": "validate.ts",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "dependencies": {
     "@types/fs-extra": {
       "version": "0.0.37",
@@ -712,7 +712,7 @@
       "dev": true
     },
     "eslint": {
-      "version": "3.16.0",
+      "version": "3.16.1",
       "dev": true
     },
     "eslint-config-airbnb": {
@@ -991,6 +991,10 @@
       "dependencies": {
         "duplexer2": {
           "version": "0.1.4",
+          "dev": true
+        },
+        "readable-stream": {
+          "version": "2.0.6",
           "dev": true
         }
       }
@@ -1354,16 +1358,46 @@
       "dev": true
     },
     "jest": {
-      "version": "19.0.0",
+      "version": "19.0.2",
       "dev": true
     },
     "jest-changed-files": {
-      "version": "19.0.0",
+      "version": "19.0.2",
       "dev": true
     },
     "jest-cli": {
-      "version": "19.0.0",
-      "dev": true
+      "version": "19.0.2",
+      "dev": true,
+      "dependencies": {
+        "jest-config": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-environment-jsdom": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-environment-node": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-jasmine2": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-resolve": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-util": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-validate": {
+          "version": "19.0.2",
+          "dev": true
+        }
+      }
     },
     "jest-config": {
       "version": "19.0.0",
@@ -1382,7 +1416,7 @@
       "dev": true
     },
     "jest-environment-node-debug": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "dev": true
     },
     "jest-file-exists": {
@@ -1395,7 +1429,13 @@
     },
     "jest-jasmine2": {
       "version": "19.0.0",
-      "dev": true
+      "dev": true,
+      "dependencies": {
+        "jest-snapshot": {
+          "version": "19.0.0",
+          "dev": true
+        }
+      }
     },
     "jest-matcher-utils": {
       "version": "19.0.0",
@@ -1426,12 +1466,52 @@
       "dev": true
     },
     "jest-runtime": {
-      "version": "19.0.0",
-      "dev": true
+      "version": "19.0.2",
+      "dev": true,
+      "dependencies": {
+        "jest-config": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-environment-jsdom": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-environment-node": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-jasmine2": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-resolve": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-util": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-validate": {
+          "version": "19.0.2",
+          "dev": true
+        }
+      }
     },
     "jest-snapshot": {
-      "version": "19.0.0",
-      "dev": true
+      "version": "19.0.2",
+      "dev": true,
+      "dependencies": {
+        "jest-util": {
+          "version": "19.0.2",
+          "dev": true
+        },
+        "jest-validate": {
+          "version": "19.0.2",
+          "dev": true
+        }
+      }
     },
     "jest-util": {
       "version": "19.0.0",
@@ -2063,7 +2143,13 @@
     },
     "read-all-stream": {
       "version": "3.1.0",
-      "dev": true
+      "dev": true,
+      "dependencies": {
+        "readable-stream": {
+          "version": "2.0.6",
+          "dev": true
+        }
+      }
     },
     "read-pkg": {
       "version": "1.1.0",
@@ -2451,7 +2537,7 @@
       "dev": true
     },
     "tslib": {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "dev": true
     },
     "tslint": {
@@ -2490,7 +2576,7 @@
       "dev": true
     },
     "typescript": {
-      "version": "2.1.6",
+      "version": "2.2.1",
       "dev": true
     },
     "uglify-js": {
