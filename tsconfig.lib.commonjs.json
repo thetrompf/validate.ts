@@ -5,7 +5,8 @@
     ],
     "exclude": [
         "src/**/__mocks__/*.ts",
-        "src/**/__tests__/*.ts"
+        "src/**/__tests__/*.ts",
+        "node_modules"
     ],
     "compilerOptions": {
         "declaration": true,
