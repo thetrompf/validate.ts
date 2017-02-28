@@ -118,12 +118,12 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
             'password-repeat': {
                 dependencies: ['password'],
                 validators: [
-                    requiredValidator,
                     (value, dependencies) => {
-                        if (utils.isEmpty(value)) {
+                        const password = dependencies.get('password');
+                        if (utils.isEmpty(value) || utils.isEmpty(password)) {
                             return Promise.resolve(null);
                         }
-                        if (value !== dependencies.get('password')) {
+                        if (value !== password) {
                             return Promise.reject(new ValidationError('Must match the other password field'));
                         }
                         return Promise.resolve(null);

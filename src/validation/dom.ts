@@ -71,38 +71,62 @@ function createStaticSetErrorsFn(formMap: FormMap, options: WrapOptions) {
             formMap[field].fieldElement.classList.add(options.errorClass);
             const feedbackElement = formMap[field].feedbackElement;
             if (feedbackElement != null) {
-                if (validationErrors.length > 1) {
-                    feedbackElement.innerHTML = `
-                        <ul>
-                            <li>${validationErrors.map(e => e.message).join('</li><li>')}</li>
-                        </ul>
-                    `;
-                } else {
-                    feedbackElement.innerHTML = validationErrors[0].message as string;
+                switch (validationErrors.length) {
+                    case 1:
+                        feedbackElement.innerHTML = escapeHtml(validationErrors[0].message);
+                        break;
+                    default:
+                        feedbackElement.innerHTML = `
+                            <ul>
+                                <li>${validationErrors.map(e => escapeHtml(e.message)).join('</li><li>')}</li>
+                            </ul>
+                        `;
+                        break;
                 }
             }
         });
     };
 }
 
+function escapeHtml(content?: string): string {
+    if (content == null) {
+        return '';
+    }
+
+    const text = document.createTextNode(content);
+    const div = document.createElement('div');
+    div.appendChild(text);
+
+    return div.innerHTML;
+}
+
 function createLiveSetErrorsFn(formMap: FormMap, options: WrapOptions) {
     return (changeMap: LiveValidationChangeMap<FormMap, ValidationError>) => {
         changeMap.forEach((errors, field) => {
             const map = formMap[field];
-            if (errors.length === 0) {
-                if (map.feedbackElement) {
-                    map.feedbackElement.innerHTML = '';
-                }
-                map.fieldElement.classList.remove(options.errorClass);
-            } else {
-                if (map.feedbackElement) {
-                    map.feedbackElement.innerHTML = `
-                        <ul>
-                            <li>${errors.map(e => e.message).join('</li><li>')}</li>
-                        </ul>
-                    `;
-                }
-                map.fieldElement.classList.add(options.errorClass);
+            switch (errors.length) {
+                case 0:
+                    if (map.feedbackElement) {
+                        map.feedbackElement.innerHTML = '';
+                    }
+                    map.fieldElement.classList.remove(options.errorClass);
+                    break;
+                case 1:
+                    if (map.feedbackElement) {
+                        map.feedbackElement.innerHTML = escapeHtml(errors[0].message);
+                    }
+                    map.fieldElement.classList.add(options.errorClass);
+                    break;
+                default:
+                    if (map.feedbackElement) {
+                        map.feedbackElement.innerHTML = `
+                            <ul>
+                                <li>${errors.map(e => escapeHtml(e.message)).join('</li><li>')}</li>
+                            </ul>
+                        `;
+                    }
+                    map.fieldElement.classList.add(options.errorClass);
+                    break;
             }
         });
     };
