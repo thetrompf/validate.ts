@@ -85,17 +85,7 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
                     value,
                 ]).then((value: any) => {
 
-                    // Treat required constraint specially
-                    // so the rest of the validations don't have to
-                    // deal with empty values.
-                    if (isEmpty(value)) {
-                        if (constraint.required) {
-                            // Add the required validation error to the aggregated error.
-                            errors.add(key, new RequiredValidationError('Cannot be blank'));
-                            return;
-                        }
-                    } else if (constraint.validators) {
-
+                    if (constraint.validators) {
                         // Retrieve resolved dependencies to use in the validators.
                         return Promise.race([
                             validationTimeout(),

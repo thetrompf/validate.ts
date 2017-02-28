@@ -16,6 +16,10 @@ import {
     validate,
 } from 'validation/validate';
 
+import {
+    required,
+} from 'validation/validators';
+
 test('simple call to public interface with empty value and empty constraints', async () => {
     const result = await validate({}, {});
     expect(result).toBeUndefined();
@@ -26,7 +30,9 @@ test('a required field filled out passes', async () => {
         { field: 'has-value' },
         {
             field: {
-                required: true,
+                validators: [
+                    required,
+                ]
             }
         }
     );
@@ -40,7 +46,9 @@ test('a required field fails when it is null', async () => {
             { field: null },
             {
                 field: {
-                    required: true
+                    validators: [
+                        required,
+                    ]
                 }
             }
         );
@@ -57,7 +65,9 @@ test('a required field fails when it is an empty string', async () => {
             { field: '' },
             {
                 field: {
-                    required: true
+                    validators: [
+                        required,
+                    ]
                 }
             }
         );
@@ -74,7 +84,9 @@ test('a required field only contains whitespace fails', async () => {
             { field: '    ' },
             {
                 field: {
-                    required: true
+                    validators: [
+                        required,
+                    ]
                 }
             }
         );
@@ -131,18 +143,21 @@ test('a single field with multiple failing validators', async () => {
     }
 });
 
-test('validators of a field are not called when its value is empty', async () => {
+test('validators of a field are called when its value is empty', async () => {
+    const validator = jest.fn();
+    validator.mockReturnValue(Promise.resolve(null));
     const result = await validate(
         { field: null },
         {
             field: {
                 validators: [
-                    async (value: any) => { throw new ValidationError('fail'); }
+                    validator,
                 ]
             }
         }
     );
     expect(result).toBeUndefined();
+    expect(validator).toHaveBeenCalledWith(null, undefined, {});
 });
 
 test('validators of a required field is called when field is empty', async () => {
