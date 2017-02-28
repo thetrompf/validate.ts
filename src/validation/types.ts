@@ -31,11 +31,6 @@ export interface ConstraintSpecification<T> {
     dependencies?: [keyof T];
 
     /**
-     * Mark that the field must have a non-empty value
-     */
-    required?: boolean;
-
-    /**
      * A list of validators to run against the field value
      */
     validators?: Validator<T>[];

@@ -17,7 +17,7 @@ import {
 } from 'validation/validate';
 
 import {
-    required,
+    requiredValidator,
 } from 'validation/validators';
 
 test('simple call to public interface with empty value and empty constraints', async () => {
@@ -31,7 +31,7 @@ test('a required field filled out passes', async () => {
         {
             field: {
                 validators: [
-                    required,
+                    requiredValidator,
                 ]
             }
         }
@@ -47,7 +47,7 @@ test('a required field fails when it is null', async () => {
             {
                 field: {
                     validators: [
-                        required,
+                        requiredValidator,
                     ]
                 }
             }
@@ -66,7 +66,7 @@ test('a required field fails when it is an empty string', async () => {
             {
                 field: {
                     validators: [
-                        required,
+                        requiredValidator,
                     ]
                 }
             }
@@ -85,7 +85,7 @@ test('a required field only contains whitespace fails', async () => {
             {
                 field: {
                     validators: [
-                        required,
+                        requiredValidator,
                     ]
                 }
             }
@@ -167,7 +167,6 @@ test('validators of a required field is called when field is empty', async () =>
             { field: null },
             {
                 field: {
-                    required: true,
                     validators: [
                         async (value: any) => { throw new ValidationError('fail'); }
                     ]
@@ -214,7 +213,9 @@ test('a non validation error thrown is not wrapped in ValidationAggregateError',
             {
                 field: {
                     validators: [
-                        async (value) => { throw new Error('A non validation error'); }
+                        async (value: any) => {
+                            throw new Error('A non validation error');
+                        }
                     ]
                 }
             }
@@ -243,7 +244,7 @@ test('async values is resolved before passed as dependency value', async () => {
                     'field1',
                 ],
                 validators: [
-                    async (value, dependencies) => {
+                    async (value: any, dependencies: any) => {
                         expect(dependencies.get('field1')).toEqual('test1');
                     },
                 ],
@@ -265,7 +266,7 @@ test('dependencies is passed to the validator', async () => {
                     'field1',
                 ],
                 validators: [
-                    async (value, dependencies) => {
+                    async (value: any, dependencies: any) => {
                         expect(dependencies.get('field1')).toEqual('test1');
                     },
                 ],
@@ -285,7 +286,7 @@ test('async values are resolved before passed to validators', async () => {
         {
             field1: {
                 validators: [
-                    async (value) => {
+                    async (value: any) => {
                         expect(value).toEqual('test1');
                     },
                 ]

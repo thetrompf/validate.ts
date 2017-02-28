@@ -27,7 +27,7 @@ test('live validators are called when field emits change', async () => {
         }, {
             field1: {
                 validators: [
-                    async (value, dependencies): Promise<void> => {
+                    async (value: any, dependencies: any): Promise<void> => {
                         expect(value).toEqual('value2');
                     },
                 ],
@@ -46,7 +46,8 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
     const field1 = new Field('value1');
     const changeHandler = jest.fn();
 
-    let validatorCalled = 0;
+    const validator = jest.fn();
+    validator.mockReturnValue(Promise.resolve(null));
 
     const abortSubscriptions = liveValidate(
         {
@@ -54,9 +55,7 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
         }, {
             field1: {
                 validators: [
-                    async (value, dependencies): Promise<void> => {
-                        validatorCalled++;
-                    },
+                    validator,
                 ],
             },
         },
@@ -64,12 +63,12 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
     );
 
     await field1.triggerChange();
-    expect(validatorCalled).toBe(1);
+    expect(validator).toHaveBeenCalledTimes(1);
 
     abortSubscriptions();
 
     await field1.triggerChange();
-    expect(validatorCalled).toBe(1);
+    expect(validator).toHaveBeenCalledTimes(1);
 
     expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
@@ -86,7 +85,7 @@ test('promised values are resolved when passed to validators', async () => {
         }, {
             field1: {
                 validators: [
-                    async (value) => {
+                    async (value: any) => {
                         expect(value).toEqual('async-value1');
                     }
                 ],
@@ -145,7 +144,7 @@ test('when dependant nodes fail errors are propagated to error handler', async (
             field2: {
                 dependencies: ['field1'],
                 validators: [
-                    async (value, dependencies) => {
+                    async (value: any, dependencies: any) => {
                         if (dependencies.get('field1') !== 'value1') {
                             throw new ValidationError('invalid value');
                         }
@@ -153,7 +152,7 @@ test('when dependant nodes fail errors are propagated to error handler', async (
                 ],
             },
         },
-        changes => {
+        (changes: LiveValidationChangeMap<{ field1: Field, field2: Field }>) => {
             expect(changes.hasErrors).toBe(true);
             const field2Errors = changes.getErrorsForNode('field2') as ValidationError[];
             expect(field2Errors).not.toBeUndefined();
@@ -186,7 +185,7 @@ test('when a node validation fails, dependant nodes validators are not called', 
             field1: {
                 validators: [
                     field1Validator,
-                    async (value, dependencies) => {
+                    async (value: any, dependencies: any) => {
                         if (value !== 'new-valid-value1') {
                             throw new ValidationError('invalid value');
                         }
@@ -200,10 +199,10 @@ test('when a node validation fails, dependant nodes validators are not called', 
                 ],
             },
         },
-        errors => {
-            expect(errors.hasErrors).toBe(true);
-            const field1Errors = errors.getErrorsForNode('field1') as ValidationError[];
-            const field2Errors = errors.getErrorsForNode('field2') as ValidationError[];
+        (changes: LiveValidationChangeMap<{ field1: Field, field2: Field }>) => {
+            expect(changes.hasErrors).toBe(true);
+            const field1Errors = changes.getErrorsForNode('field1') as ValidationError[];
+            const field2Errors = changes.getErrorsForNode('field2') as ValidationError[];
             expect(field2Errors).toBeUndefined();
             expect(field1Errors.length).toBe(1);
             expect(field1Errors[0].message).toBe('invalid value');
@@ -420,8 +419,8 @@ test('when a field triggers change, it exists in change map, with empty list of 
     liveValidate(
         { a: a },
         {},
-        (e) => {
-            expect(e.getErrorsForNode('a')).toHaveLength(0);
+        (changes: LiveValidationChangeMap<{ a: Field }>) => {
+            expect(changes.getErrorsForNode('a')).toHaveLength(0);
         }
     );
 
@@ -447,8 +446,8 @@ test('when a field passes its validation, it exists in change map, with empty li
                 ],
             },
         },
-        (e) => {
-            expect(e.getErrorsForNode('a')).toHaveLength(0);
+        (changes: any) => {
+            expect(changes.getErrorsForNode('a')).toHaveLength(0);
         }
     );
 
@@ -474,11 +473,11 @@ test('when a field triggers change and has dependants, they appear in the change
                 dependencies: ['a'],
             }
         },
-        (e) => {
-            expect(e.hasErrors).toBe(false);
-            expect(Array.from(e.keys())).toEqual(['a', 'b']);
-            expect(e.getErrorsForNode('a')).toEqual([]);
-            expect(e.getErrorsForNode('b')).toEqual([]);
+        (changes: LiveValidationChangeMap<{ a: Field, b: Field }>) => {
+            expect(changes.hasErrors).toBe(false);
+            expect(Array.from(changes.keys())).toEqual(['a', 'b']);
+            expect(changes.getErrorsForNode('a')).toEqual([]);
+            expect(changes.getErrorsForNode('b')).toEqual([]);
         },
     );
 
@@ -510,10 +509,10 @@ test('when a field fails its validations, its dependants does not appear in chan
                 dependencies: ['a'],
             }
         },
-        (e) => {
-            expect(e.hasErrors).toBe(true);
-            expect(Array.from(e.keys())).toEqual(['a']);
-            expect(e.getErrorsForNode('a')).toHaveLength(1);
+        (changes: LiveValidationChangeMap<{ a: Field, b: Field }>) => {
+            expect(changes.hasErrors).toBe(true);
+            expect(Array.from(changes.keys())).toEqual(['a']);
+            expect(changes.getErrorsForNode('a')).toHaveLength(1);
         },
     );
 
@@ -546,10 +545,10 @@ test('when field triggers change, if a later change triggers, and returns first,
                 ],
             }
         },
-        (e) => {
-            expect(e.hasErrors).toBe(false);
-            expect(Array.from(e.keys())).toEqual(['a']);
-            expect(e.getErrorsForNode('a')).toHaveLength(0);
+        (changes: LiveValidationChangeMap<{ a: Field }>) => {
+            expect(changes.hasErrors).toBe(false);
+            expect(Array.from(changes.keys())).toEqual(['a']);
+            expect(changes.getErrorsForNode('a')).toHaveLength(0);
         },
     );
 

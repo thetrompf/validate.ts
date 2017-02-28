@@ -23,7 +23,6 @@ import {
 import {
     addAllConstraints,
     buildDependencyMap,
-    isEmpty,
     LiveValidationChangeMap,
     validationTimeout,
 } from './utils';
@@ -141,8 +140,7 @@ async function validateNode<TValues extends FieldObservables>(
     ]).then((value: any) => {
 
         // No need to proceed if subscription are canclled.
-        // No need for live-validate empty values.
-        if (!nodeState.global.subscriptionIsActive || isEmpty(value)) {
+        if (!nodeState.global.subscriptionIsActive) {
             return;
         }
 
