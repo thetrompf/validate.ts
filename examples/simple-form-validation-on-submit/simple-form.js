@@ -5,9 +5,10 @@
 define(['require', '/dist/amd/validate.js'], (require) => {
 
     /* eslint-disable import/no-dynamic-require */
-    require(['validate', 'validation/dom'], (_validate, validateDom) => {
+    require(['validate', 'validation/dom', 'validation/utils', 'validation/validators'], (_validate, validateDom, utils, validators) => {
         const { validate, ValidationError } = _validate;
         const { getFormValidationObject } = validateDom;
+        const { requiredValidator } = validators;
 
         const form = document.querySelector('form');
         const submitButton = document.querySelector('button');
@@ -32,9 +33,12 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                 formValidationObject.values,
                 {
                     'name': {
-                        required: true,
                         validators: [
+                            requiredValidator,
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (value.length <= 5) {
                                     return Promise.reject(new ValidationError('Name must contain 5 chars or more'));
                                 }
@@ -43,15 +47,21 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                         ],
                     },
                     'username': {
-                        required: true,
                         validators: [
+                            requiredValidator,
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (value.length < 7) {
                                     return Promise.reject(new ValidationError('Username must contain 7 chars or more'));
                                 }
                                 return Promise.resolve(null);
                             },
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (value.indexOf('@') === -1 || value.indexOf('.') === -1) {
                                     // poor man's email validator.
                                     return Promise.reject(new ValidationError('Username must be a valid email address'));
@@ -61,27 +71,39 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                         ],
                     },
                     'password': {
-                        required: true,
                         validators: [
+                            requiredValidator,
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (value.length < 8) {
                                     return Promise.reject(new ValidationError(`Password is ${8 - value.length + 1} char(s) too short.`));
                                 }
                                 return Promise.resolve(null);
                             },
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (!/[a-z]/.test(value)) {
                                     return Promise.reject(new ValidationError('Password must contain lower case letters'));
                                 }
                                 return Promise.resolve(null);
                             },
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (!/[A-Z]/.test(value)) {
                                     return Promise.reject(new ValidationError('Password must contain upper case letters'));
                                 }
                                 return Promise.resolve(null);
                             },
                             (value) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (!/[0-9]/.test(value)) {
                                     return Promise.reject(new ValidationError('Password must contain numbers'));
                                 }
@@ -91,9 +113,12 @@ define(['require', '/dist/amd/validate.js'], (require) => {
                     },
                     'password-repeat': {
                         dependencies: ['password'],
-                        required: true,
                         validators: [
+                            requiredValidator,
                             (value, dependencies) => {
+                                if (utils.isEmpty(value)) {
+                                    return Promise.resolve(null);
+                                }
                                 if (value !== dependencies.get('password')) {
                                     return Promise.reject(new ValidationError('Must match the other password field'));
                                 }

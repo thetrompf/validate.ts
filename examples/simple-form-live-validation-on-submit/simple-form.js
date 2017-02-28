@@ -5,12 +5,16 @@
 define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
 
     /* eslint-disable import/no-dynamic-require */
-    require(['validate', 'validation/dom'], (_validate, validateDom) => {
+    require(['validate', 'validation/dom', 'validation/utils', 'validation/validators'], (_validate, validateDom, utils, validators) => {
         const {
             liveValidate,
             ValidationError,
             validate,
         } = _validate;
+
+        const {
+            requiredValidator,
+        } = validators;
 
         const {
             getFormValidationObject,
@@ -33,9 +37,12 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
 
         const constraints = {
             'name': {
-                required: true,
                 validators: [
+                    requiredValidator,
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (value.length <= 5) {
                             return Promise.reject(new ValidationError(`Name is ${6 - value.length} char(s) too short.`));
                         }
@@ -44,15 +51,21 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                 ],
             },
             'username': {
-                required: true,
                 validators: [
+                    requiredValidator,
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (value.length < 7) {
                             return Promise.reject(new ValidationError(`Username is ${8 - value.length} char(s) too short.`));
                         }
                         return Promise.resolve(null);
                     },
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         // poor man's email validator.
                         if (!/[a-z0-9_.+-]+@[a-z0-9_.-]+\.[a-z]+/i.test(value)) {
                             return Promise.reject(new ValidationError('Username must be a valid email address.'));
@@ -62,27 +75,39 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                 ],
             },
             'password': {
-                required: true,
                 validators: [
+                    requiredValidator,
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (value.length < 8) {
                             return Promise.reject(new ValidationError(`Password is ${9 - value.length} char(s) too short.`));
                         }
                         return Promise.resolve(null);
                     },
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (!/[a-z]/.test(value)) {
                             return Promise.reject(new ValidationError('Password must contain lower case letters'));
                         }
                         return Promise.resolve(null);
                     },
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (!/[A-Z]/.test(value)) {
                             return Promise.reject(new ValidationError('Password must contain upper case letters'));
                         }
                         return Promise.resolve(null);
                     },
                     (value) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (!/[0-9]/.test(value)) {
                             return Promise.reject(new ValidationError('Password must contain numbers'));
                         }
@@ -92,9 +117,12 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
             },
             'password-repeat': {
                 dependencies: ['password'],
-                required: true,
                 validators: [
+                    requiredValidator,
                     (value, dependencies) => {
+                        if (utils.isEmpty(value)) {
+                            return Promise.resolve(null);
+                        }
                         if (value !== dependencies.get('password')) {
                             return Promise.reject(new ValidationError('Must match the other password field'));
                         }
@@ -113,8 +141,8 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                 () => {
                     console.log('Success!');
                 },
-                (e) => {
-                    formValidationObject.setStaticErrors(e);
+                (changes) => {
+                    formValidationObject.setStaticErrors(changes);
                     if (cancelLiveValidationSubscription === null) {
                         cancelLiveValidationSubscription = liveValidate(
                             formValidationObject.valueProviders,
@@ -122,7 +150,8 @@ define('simple-form', ['require', '/dist/amd/validate.js'], (require) => {
                             formValidationObject.setLiveErrors
                         );
                     }
-                })
+                }
+            );
         });
 
         resetButton.addEventListener('click', (event) => {
