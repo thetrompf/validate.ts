@@ -65,7 +65,6 @@
         "build:lib-es2015": "yarn clean:lib-es2015 && tsc -p tsconfig.lib.es2015.json",
         "build:source": "yarn clean:build && tsc -p tsconfig.json",
         "build": "yarn build:dist-amd && yarn build:dist-system && yarn build:lib-commonjs && yarn build:lib-es2015",
-        "clean": "yarn clean:build && yarn clean:coverage && yarn clean:dist && yarn clean:lib",
         "clean:build": "rm -Rf build/",
         "clean:coverage": "rm -Rf coverage/",
         "clean:dist-amd": "rm -Rf dist/amd/",
@@ -74,11 +73,13 @@
         "clean:lib-commonjs": "rm -Rf lib/",
         "clean:lib-es2015": "rm -Rf lib2015/",
         "clean:lib": "yarn run clean:lib-commonjs && yarn run clean:lib-es2015",
+        "clean": "yarn clean:build && yarn clean:coverage && yarn clean:dist && yarn clean:lib",
         "compress:dist-amd": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/amd/validate.min.js -- dist/amd/validate.js",
         "compress:dist-system": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/system/validate.min.js -- dist/system/validate.js",
         "coverage": "yarn clean:coverage && jest --coverage",
         "lint": "tslint .",
         "serve:examples": "yarn build:dist-amd && serve --ignore='.vscode/,coverage/,dist/system/,node_modules/,src/,.eslintrc.json,.gitignore,.gitlab-ci.yml,.npmignore,CHANGELOG.md,LICENSE,README.md,npm-shrinkwrap.json,package.json,tsconfig.dist.amd.json,tsconfig.dist.system.json,tsconfig.json,tsconfig.lib.commonjs.json,tsconfig.lib.es2015.json,tsconfig.test.json,tslint.json,yarn.lock'",
+        "test:debug": "node --nolazy --inspect-brk node_modules/.bin/jest --no-cache --runInBand --env jest-environment-node-debug",
         "test": "jest"
     },
     "version": "2.0.2"
