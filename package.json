@@ -4,20 +4,20 @@
         "tslib": "1.6.0"
     },
     "devDependencies": {
-        "@types/jest": "18.1.1",
-        "@types/node": "7.0.5",
-        "eslint": "3.16.1",
+        "@types/jest": "^19.2.1",
+        "@types/node": "^7.0.8",
+        "eslint": "^3.17.1",
         "eslint-config-airbnb": "14.1.0",
         "eslint-plugin-import": "2.2.0",
         "eslint-plugin-jsx-a11y": "4.0.0",
         "eslint-plugin-react": "6.10.0",
         "jest": "19.0.2",
         "jest-environment-node-debug": "2.0.0",
-        "serve": "3.4.1",
+        "serve": "^5.0.2",
         "ts-jest": "19.0.0",
-        "tslint": "4.4.2",
+        "tslint": "^4.5.1",
         "typescript": "2.2.1",
-        "uglify-js": "2.7.5"
+        "uglify-js": "^2.8.12"
     },
     "jest": {
         "collectCoverage": false,
