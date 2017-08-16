@@ -53,6 +53,7 @@
     },
     "license": "BSD-3-Clause",
     "main": "lib/validate.js",
+    "module": "lib2015/validate.js",
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
     "scripts": {
