@@ -1,23 +1,23 @@
 {
     "author": "Brian K. Christensen, Resem.pl ltd. <bkc@resem.pl>",
     "dependencies": {
-        "tslib": "1.6.0"
+        "tslib": "^1.7.1"
     },
     "devDependencies": {
-        "@types/jest": "^19.2.1",
-        "@types/node": "^7.0.8",
-        "eslint": "^3.17.1",
-        "eslint-config-airbnb": "14.1.0",
-        "eslint-plugin-import": "2.2.0",
-        "eslint-plugin-jsx-a11y": "4.0.0",
-        "eslint-plugin-react": "6.10.0",
-        "jest": "19.0.2",
-        "jest-environment-node-debug": "2.0.0",
-        "serve": "^5.0.2",
-        "ts-jest": "19.0.0",
-        "tslint": "^4.5.1",
-        "typescript": "2.2.1",
-        "uglify-js": "^2.8.12"
+        "@types/jest": "^20.0.7",
+        "@types/node": "^8.0.22",
+        "eslint": "^4.4.1",
+        "eslint-config-airbnb": "^15.1.0",
+        "eslint-plugin-import": "^2.7.0",
+        "eslint-plugin-jsx-a11y": "^6.0.2",
+        "eslint-plugin-react": "^7.2.1",
+        "jest": "^20.0.4",
+        "jest-environment-node-debug": "^2.0.0",
+        "serve": "^6.0.6",
+        "ts-jest": "^20.0.10",
+        "tslint": "^5.6.0",
+        "typescript": "^2.4.2",
+        "uglify-js": "^3.0.27"
     },
     "jest": {
         "collectCoverage": false,
