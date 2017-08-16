@@ -56,6 +56,7 @@
     "module": "lib2015/validate.js",
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
+    "types": "types/validate.d.ts",
     "scripts": {
         "_build:dist-amd": "tsc -p tsconfig.dist.amd.json",
         "_build:dist-system": "tsc -p tsconfig.dist.system.json",

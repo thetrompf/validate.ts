@@ -6,3 +6,4 @@ dist/
 lib/
 lib2015/
 node_modules/
+types/
