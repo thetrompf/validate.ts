@@ -1,11 +1,10 @@
-
 /**
  * The base validation error.
  */
-export class ValidationError {
-    public readonly message: string | undefined;
+export class ValidationError extends Error {
     constructor(message?: string) {
-        this.message = message;
+        super(message);
+        Object.setPrototypeOf(this, ValidationError.prototype);
     }
 }
 
@@ -15,8 +14,8 @@ export class ValidationError {
 export class ValidationTimeoutError extends ValidationError {
     constructor(message?: string) {
         super(message);
+        Object.setPrototypeOf(this, ValidationTimeoutError.prototype);
     }
-
 }
 
 /**
@@ -26,6 +25,7 @@ export class ValidationTimeoutError extends ValidationError {
 export class RequiredValidationError extends ValidationError {
     constructor(message?: string) {
         super(message);
+        Object.setPrototypeOf(this, RequiredValidationError.prototype);
     }
 }
 
@@ -33,11 +33,11 @@ export class RequiredValidationError extends ValidationError {
  * The aggregated error to be thrown to the caller.
  */
 export class ValidationAggregateError<TValues> extends ValidationError {
-
     private _errors: Map<keyof TValues, ValidationError[]>;
 
     public constructor(message?: string) {
         super(message);
+        Object.setPrototypeOf(this, ValidationAggregateError.prototype);
         this._errors = new Map();
     }
 
