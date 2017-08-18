@@ -1,8 +1,8 @@
 ---
 stages:
 - prepare
-- test
 - lint
+- test
 - build
 - deploy
 
@@ -13,7 +13,7 @@ yarn:install:
   cache:
     paths:
     - node_modules/
-  image: docker.input-output.dk/docker/nodejs:7.5.0
+  image: docker.input-output.dk/docker/nodejs:8.4.0
   script:
   - yarn install
   stage: prepare
@@ -23,27 +23,37 @@ yarn:install:
 lint:
   dependencies:
   - yarn:install
-  image: docker.input-output.dk/docker/nodejs:7.5.0
+  image: docker.input-output.dk/docker/nodejs:8.4.0
   script:
   - yarn lint
   stage: lint
   tags:
   - kubernetes
 
-test:7.5.0:
+test:8.4.0:
   dependencies:
   - yarn:install
-  image: docker.input-output.dk/docker/nodejs:7.5.0
+  image: docker.input-output.dk/docker/nodejs:8.4.0
   script:
   - yarn test
   stage: test
   tags:
   - kubernetes
 
-test:6.9.5:
+test:7.7.1:
   dependencies:
   - yarn:install
-  image: docker.input-output.dk/docker/nodejs:6.9.5
+  image: docker.input-output.dk/docker/nodejs:7.7.1
+  script:
+  - yarn test
+  stage: test
+  tags:
+  - kubernetes
+
+test:6.11.2:
+  dependencies:
+  - yarn:install
+  image: docker.input-output.dk/docker/nodejs:6.11.2
   script:
   - yarn test
   stage: test
@@ -58,7 +68,7 @@ build:
     - lib2015/
   dependencies:
     - yarn:install
-  image: docker.input-output.dk/docker/nodejs:7.5.0
+  image: docker.input-output.dk/docker/nodejs:8.4.0
   script:
   - yarn build --production
   stage: build
@@ -68,7 +78,7 @@ build:
 publish:
   dependencies:
   - build
-  image: docker.input-output.dk/docker/nodejs:7.5.0
+  image: docker.input-output.dk/docker/nodejs:8.4.0
   only:
   - tags
   - triggers
