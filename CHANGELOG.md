@@ -1,3 +1,22 @@
+## 2.0.5 (August 21, 2017)
+* Hopefully types are properly generated and distributed.
+* Keep all dependencies fully up-to-date.
+
+## 2.0.4 (August 18, 2017)
+* "Properly" extend `Error` classes, in order to make instanceof checks on catched errors.
+
+## 2.0.3 (August 16, 2017)
+* Types are now generated in the `types/` directory and referenced correctly in `package.json`.
+* Declare modules for ES2015 with the `module` directive in `package.json`, this convension
+  is used by both `webpack` and `rollup` and probably more, this enables better tree-shaking
+  when uses build tools.
+* **Breaking chagne**: The required validation is no longer special cased
+  the null/empty case need to be handled by validators it self,
+  I have provided the old required validator behavior as a helper.
+
+## 2.0.2 (Febrary 24, 2017)
+* Nothing happened, just testing publishing through CI.
+
 ## 2.0.1 (February 24, 2017)
 * Fix type mappings for npm package
 
