@@ -66,6 +66,7 @@ build:
     - dist/
     - lib/
     - lib2015/
+    - types/
   dependencies:
     - yarn:install
   image: docker.input-output.dk/docker/nodejs:8.4.0
