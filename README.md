@@ -1,5 +1,4 @@
-Validate.ts
-===========
+# Validate.ts #
 
 This library is heavily inspired by [validate.js](https://validatejs.org/).
 It is a data source agnostic user input validation library.
