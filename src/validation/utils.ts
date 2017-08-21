@@ -1,17 +1,6 @@
-import {
-    Graph,
-} from '../dependency-graph/graph';
-
-import {
-    ValidationError,
-    ValidationTimeoutError,
-} from './errors';
-
-import {
-    Constraints,
-    FieldValuesObject,
-    LiveValidationChangeMap as ILiveValidationChangeMap,
-} from './types';
+import { Graph } from '../dependency-graph/graph';
+import { ValidationError, ValidationTimeoutError } from './errors';
+import { Constraints, FieldValuesObject, LiveValidationChangeMap as ILiveValidationChangeMap } from './types';
 
 /**
  * Add `dependencies` as outgoing edges from `node` in the `graph`.
@@ -55,7 +44,10 @@ export function buildDependencyMap<T>(constraints: Constraints<T>): Map<keyof T,
  *
  * If `dependencies` are not provieded the return value is `undefined`.
  */
-export async function getPromisedDependencyMap<T>(values: FieldValuesObject, dependencies: Set<keyof T> | undefined): Promise<Map<keyof T, any> | undefined> {
+export async function getPromisedDependencyMap<T>(
+    values: FieldValuesObject,
+    dependencies: Set<keyof T> | undefined,
+): Promise<Map<keyof T, any> | undefined> {
     if (dependencies == null) {
         return undefined;
     }
@@ -67,7 +59,7 @@ export async function getPromisedDependencyMap<T>(values: FieldValuesObject, dep
         const value = values[key];
         if (value != null) {
             if (value instanceof Promise) {
-                promises.push(value.then((v) => map.set(key, v)));
+                promises.push(value.then(v => map.set(key, v)));
             } else {
                 map.set(key, value);
             }
@@ -102,17 +94,16 @@ export function validationTimeout(id?: string): Promise<void> {
  */
 export function isEmpty(value: any): boolean {
     switch (true) {
-        case (value == null):
+        case value == null:
             return true;
-        case (typeof value === 'string' && value.trim().length === 0):
+        case typeof value === 'string' && value.trim().length === 0:
             return true;
-        case (Array.isArray(value) && value.length === 0):
+        case Array.isArray(value) && value.length === 0:
             return true;
         default:
             return false;
     }
-};
-
+}
 
 /**
  * The map object returned to the live validation change handler.
@@ -151,12 +142,8 @@ export class LiveValidationChangeMap<TValues> implements ILiveValidationChangeMa
     }
 
     public forEach(
-        callbackFn: (
-            value: ValidationError[],
-            key: keyof TValues,
-            map: Map<keyof TValues, ValidationError[]>,
-        ) => void,
-        thisArg?: any
+        callbackFn: (value: ValidationError[], key: keyof TValues, map: Map<keyof TValues, ValidationError[]>) => void,
+        thisArg?: any,
     ): void {
         this._errors.forEach(callbackFn, thisArg);
     }

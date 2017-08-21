@@ -1,18 +1,11 @@
-import {
-    GraphError,
-    NoSuchNodeGraphError,
-} from './errors';
-
-import {
-    createDfs,
-} from './utils';
+import { GraphError, NoSuchNodeGraphError } from './errors';
+import { createDfs } from './utils';
 
 /**
  * A simple class for modelling a
  * dependency graph data structure.
  */
 export class Graph<TNode, TData> {
-
     /**
      * This property is only protected for testing purposes.
      **/
@@ -29,9 +22,9 @@ export class Graph<TNode, TData> {
     protected nodes: Map<TNode, TData>;
 
     public constructor() {
-        this.nodes = new Map;
-        this.incomingEdges = new Map;
-        this.outgoingEdges = new Map;
+        this.nodes = new Map();
+        this.incomingEdges = new Map();
+        this.outgoingEdges = new Map();
     }
 
     /**
@@ -45,8 +38,8 @@ export class Graph<TNode, TData> {
         if (!this.nodes.has(node)) {
             this.nodes.set(node, data);
 
-            this.incomingEdges.set(node, new Set);
-            this.outgoingEdges.set(node, new Set);
+            this.incomingEdges.set(node, new Set());
+            this.outgoingEdges.set(node, new Set());
         }
     }
 
@@ -199,13 +192,15 @@ export class Graph<TNode, TData> {
         keys.forEach(cycleDfs);
 
         const dfs = createDfs(this.outgoingEdges, leavesOnly, result);
-        keys.filter(node => {
-            const ie = this.incomingEdges.get(node);
-            if (ie == null) {
-                throw new GraphError('This should never happen');
-            }
-            return ie.size === 0;
-        }).forEach(dfs);
+        keys
+            .filter(node => {
+                const ie = this.incomingEdges.get(node);
+                if (ie == null) {
+                    throw new GraphError('This should never happen');
+                }
+                return ie.size === 0;
+            })
+            .forEach(dfs);
 
         return result;
     }

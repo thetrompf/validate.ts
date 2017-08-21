@@ -1,13 +1,5 @@
-import {
-    ValidationAggregateError,
-    ValidationError,
-} from './errors';
-
-import {
-    Constraints,
-    LiveValidationChangeMap,
-    ValueProvider,
-} from './types';
+import { ValidationAggregateError, ValidationError } from './errors';
+import { Constraints, LiveValidationChangeMap, ValueProvider } from './types';
 
 export type HTMLFormValueElement =
     | HTMLButtonElement
@@ -15,8 +7,7 @@ export type HTMLFormValueElement =
     | HTMLOptionElement
     | HTMLOptGroupElement
     | HTMLSelectElement
-    | HTMLTextAreaElement
-    ;
+    | HTMLTextAreaElement;
 
 export interface WrapOptions {
     feedbackSelector: string | null;
@@ -38,10 +29,10 @@ const defaultOptions: WrapOptions = {
 
 export interface FormMap {
     [fieldName: string]: {
-        fieldElement: Element,
-        editorElement: HTMLFormValueElement | null,
-        feedbackElement: Element | null,
-        valueProvider: ValueProvider | null,
+        fieldElement: Element;
+        editorElement: HTMLFormValueElement | null;
+        feedbackElement: Element | null;
+        valueProvider: ValueProvider | null;
     };
 }
 
@@ -132,7 +123,6 @@ function createLiveSetErrorsFn(formMap: FormMap, options: WrapOptions) {
     };
 }
 
-
 export function createValueProvider(editor: HTMLFormValueElement): ValueProvider {
     return {
         getValue: (): any => {
@@ -150,7 +140,7 @@ export function createValueProvider(editor: HTMLFormValueElement): ValueProvider
 }
 
 export function getFormValidationObject(form: HTMLFormElement, options?: Partial<WrapOptions>) {
-    const resolvedOptions = Object.assign({}, defaultOptions, (options || {}));
+    const resolvedOptions = Object.assign({}, defaultOptions, options || {});
 
     if (!resolvedOptions.static && !resolvedOptions.live) {
         throw new Error('No validation mode enabled');
@@ -170,11 +160,10 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
         const fieldName = editorElement.getAttribute('name') as string;
         formMap[fieldName] = {
             editorElement: editorElement,
-            feedbackElement: (
+            feedbackElement:
                 resolvedOptions.feedbackSelector == null
                     ? null
-                    : fieldElement.querySelector(resolvedOptions.feedbackSelector)
-            ),
+                    : fieldElement.querySelector(resolvedOptions.feedbackSelector),
             fieldElement: fieldElement,
             valueProvider: resolvedOptions.live ? createValueProvider(editorElement) : null,
         };
@@ -183,12 +172,8 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
     const result = {
         clearErrors: createClearErrorsFn(formMap, resolvedOptions),
         formMap: formMap,
-        setStaticErrors: resolvedOptions.static
-            ? createStaticSetErrorsFn(formMap, resolvedOptions)
-            : null,
-        setLiveErrors: resolvedOptions.live
-            ? createLiveSetErrorsFn(formMap, resolvedOptions)
-            : null,
+        setStaticErrors: resolvedOptions.static ? createStaticSetErrorsFn(formMap, resolvedOptions) : null,
+        setLiveErrors: resolvedOptions.live ? createLiveSetErrorsFn(formMap, resolvedOptions) : null,
     };
 
     if (resolvedOptions.static) {
@@ -201,7 +186,7 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
                     res[field] = (formMap[field].editorElement as HTMLFormValueElement).value;
                 }
                 return res;
-            }
+            },
         });
     }
 
@@ -215,7 +200,7 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
                     res[field] = formMap[field].valueProvider;
                 }
                 return res;
-            }
+            },
         });
     }
 

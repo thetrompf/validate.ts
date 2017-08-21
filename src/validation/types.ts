@@ -1,10 +1,5 @@
-import {
-    EventEmitter,
-} from 'events';
-
-import {
-    ValidationAggregateError,
-} from './errors';
+import { EventEmitter } from 'events';
+import { ValidationAggregateError } from './errors';
 
 /**
  * The interface of a validator function.
@@ -24,7 +19,6 @@ export interface FieldValuesObject {
  * The interface/options for constraints.
  */
 export interface ConstraintSpecification<T> {
-
     /**
      * A list of identifiers to depend on.
      */
@@ -40,8 +34,8 @@ export interface ConstraintSpecification<T> {
  * A map of constraints to hold up against `TValues`.
  */
 export type Constraints<TValues> = {
-    // tslint:disable-next-line:semicolon
-    [P in keyof TValues]?: ConstraintSpecification<TValues>;
+    [// tslint:disable-next-line:semicolon
+    P in keyof TValues]?: ConstraintSpecification<TValues>
 };
 
 /**
@@ -56,12 +50,8 @@ export interface LiveValidationChangeMap<TValues, TError> {
     addError(node: keyof TValues, error: TError): void;
     entries(): IterableIterator<[keyof TValues, TError[]]>;
     forEach(
-        callbackFn: (
-            value: TError[],
-            key: keyof TValues,
-            map: Map<keyof TValues, TError[]>,
-        ) => void,
-        thisArg?: any
+        callbackFn: (value: TError[], key: keyof TValues, map: Map<keyof TValues, TError[]>) => void,
+        thisArg?: any,
     ): void;
     getErrorsForNode(node: keyof TValues): TError[] | undefined;
     getAllErrors(): Map<keyof TValues, TError[]>;
@@ -71,7 +61,6 @@ export interface LiveValidationChangeMap<TValues, TError> {
     values(): IterableIterator<TError[]>;
     toString(): string;
 }
-
 
 export interface LiveValidationChangeHandler<TValues, TError> {
     (e: LiveValidationChangeMap<TValues, TError>): void;

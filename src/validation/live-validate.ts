@@ -1,12 +1,5 @@
-import {
-    Graph,
-} from '../dependency-graph/graph';
-
-import {
-    ValidationAggregateError,
-    ValidationError,
-} from './errors';
-
+import { Graph } from '../dependency-graph/graph';
+import { ValidationAggregateError, ValidationError } from './errors';
 import {
     Constraints,
     ConstraintSpecification,
@@ -20,12 +13,7 @@ import {
     ValueProvider,
 } from './types';
 
-import {
-    addAllConstraints,
-    buildDependencyMap,
-    LiveValidationChangeMap,
-    validationTimeout,
-} from './utils';
+import { addAllConstraints, buildDependencyMap, LiveValidationChangeMap, validationTimeout } from './utils';
 
 /**
  * Return a map with all the values of the `dependencies` resolved,
@@ -50,7 +38,7 @@ async function getPromisedDependencyMap<TValues extends FieldObservables>(
         if (value != null) {
             value = value.getValue();
             if (value instanceof Promise) {
-                promises.push(value.then((v) => map.set(key, v)));
+                promises.push(value.then(v => map.set(key, v)));
             } else {
                 map.set(key, value);
             }
@@ -72,7 +60,7 @@ function getErrorHandlerForNode<TValues>(
     node: keyof TValues,
     changeMap: LiveValidationChangeMap<TValues>,
 ): NodeValidationErrorHandler {
-    return function (e: any): void {
+    return function(e: any): void {
         if (e instanceof ValidationError) {
             changeMap.addError(node, e);
             return;
@@ -84,7 +72,7 @@ function getErrorHandlerForNode<TValues>(
 interface ValidationNodeState {
     version: number;
     global: {
-        subscriptionIsActive: boolean,
+        subscriptionIsActive: boolean;
     };
 }
 
@@ -102,18 +90,9 @@ async function validateNode<TValues extends FieldObservables>(
     globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
     nodeState: ValidationNodeState,
 ): Promise<void> {
-
     const validateDendencies = () => {
         return Promise.all(
-            validateDependenciesFor(
-                node,
-                values,
-                constraints,
-                graph,
-                dependencyMap,
-                changeMap,
-                nodeState,
-            )
+            validateDependenciesFor(node, values, constraints, graph, dependencyMap, changeMap, nodeState),
         ).then(__ => undefined);
     };
 
@@ -134,53 +113,47 @@ async function validateNode<TValues extends FieldObservables>(
     }
 
     // Race for for the value.
-    return Promise.race([
-        validationTimeout(),
-        values[node].getValue(),
-    ]).then((value: any) => {
-
-        // No need to proceed if subscription are canclled.
-        if (!nodeState.global.subscriptionIsActive) {
-            return;
-        }
-
-        // Race for the validation dependency values.
-        return Promise.race([
-            validationTimeout(),
-            getPromisedDependencyMap(values, dependencyMap.get(node)),
-        ]).then((dependencies: Map<keyof TValues, any>) => {
-
-            // This check has already been made,
-            // but in async context the type checker
-            // thinks it could have been mutated in the meantime.
-            if (!nodeState.global.subscriptionIsActive || constraint.validators == null) {
+    return Promise.race([validationTimeout(), values[node].getValue()])
+        .then((value: any) => {
+            // No need to proceed if subscription are canclled.
+            if (!nodeState.global.subscriptionIsActive) {
                 return;
             }
 
-            const dependantValidationTimeout = validationTimeout();
-            return Promise.all(constraint.validators.map((validate: Validator<TValues>) => {
-
-                // Run the validators of the field,
-                // race all the validation for timeout.
-                return Promise.race([
-                    dependantValidationTimeout,
-                    validate(value, dependencies, {})
-                        .catch(globalChangeCallback),
-                ]);
-
-            })).then(() => {
-
-                // Opt-out of the chain if an error has occured
-                // or
-                if (changeMap.hasErrors || !nodeState.global.subscriptionIsActive) {
+            // Race for the validation dependency values.
+            return Promise.race([
+                validationTimeout(),
+                getPromisedDependencyMap(values, dependencyMap.get(node)),
+            ]).then((dependencies: Map<keyof TValues, any>) => {
+                // This check has already been made,
+                // but in async context the type checker
+                // thinks it could have been mutated in the meantime.
+                if (!nodeState.global.subscriptionIsActive || constraint.validators == null) {
                     return;
                 }
 
-                // Run validation of the dependants of this node.
-                return validateDendencies();
+                const dependantValidationTimeout = validationTimeout();
+                return Promise.all(
+                    constraint.validators.map((validate: Validator<TValues>) => {
+                        // Run the validators of the field,
+                        // race all the validation for timeout.
+                        return Promise.race([
+                            dependantValidationTimeout,
+                            validate(value, dependencies, {}).catch(globalChangeCallback),
+                        ]);
+                    }),
+                ).then(() => {
+                    // Opt-out of the chain if an error has occured
+                    // or
+                    if (changeMap.hasErrors || !nodeState.global.subscriptionIsActive) {
+                        return;
+                    }
+
+                    // Run validation of the dependants of this node.
+                    return validateDendencies();
+                });
             });
-        });
-    }, globalChangeCallback)
+        }, globalChangeCallback)
         .catch(globalChangeCallback);
 }
 
@@ -196,7 +169,6 @@ function validateDependenciesFor<TValues extends FieldObservables>(
     changeMap: LiveValidationChangeMap<TValues>,
     nodeState: ValidationNodeState,
 ): Promise<void>[] {
-
     // Don't proceed if the subscriptions has been cancelled.
     if (!nodeState.global.subscriptionIsActive) {
         return [];
@@ -214,7 +186,6 @@ function validateDependenciesFor<TValues extends FieldObservables>(
         // validators described.
         const constraint = constraints[dependant];
         if (constraint && constraint.validators) {
-
             promises.push(
                 validateNode(
                     dependant,
@@ -225,7 +196,7 @@ function validateDependenciesFor<TValues extends FieldObservables>(
                     changeMap,
                     dependantErrorsHandler,
                     nodeState,
-                )
+                ),
             );
         } else {
             // event though the dependant does not have
@@ -253,26 +224,29 @@ function unwrapErrors<TValues>(
     nodeState: ValidationNodeState,
     localChangeCallback?: Function,
 ): Promise<void> {
-    return validationPromise.then(() => {
-        if (typeof localChangeCallback === 'function') {
-            if (changeMap.hasErrors) {
-                localChangeCallback(changeMap);
-            } else {
-                localChangeCallback();
+    return validationPromise.then(
+        () => {
+            if (typeof localChangeCallback === 'function') {
+                if (changeMap.hasErrors) {
+                    localChangeCallback(changeMap);
+                } else {
+                    localChangeCallback();
+                }
             }
-        }
 
-        if (version === nodeState.version && nodeState.global.subscriptionIsActive) {
-            globalChangeCallback(changeMap);
-        }
-    }, (e) => {
-        if (typeof localChangeCallback === 'function') {
-            localChangeCallback(e);
-        }
-        if (version === nodeState.version && nodeState.global.subscriptionIsActive) {
-            globalChangeCallback(changeMap);
-        }
-    });
+            if (version === nodeState.version && nodeState.global.subscriptionIsActive) {
+                globalChangeCallback(changeMap);
+            }
+        },
+        e => {
+            if (typeof localChangeCallback === 'function') {
+                localChangeCallback(e);
+            }
+            if (version === nodeState.version && nodeState.global.subscriptionIsActive) {
+                globalChangeCallback(changeMap);
+            }
+        },
+    );
 }
 
 /**
@@ -293,7 +267,6 @@ export function liveValidate<TValues extends FieldObservables>(
     constraints: Constraints<TValues>,
     globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
 ): SubscriptionCanceller {
-
     const globalState = {
         subscriptionIsActive: true,
     };
@@ -311,7 +284,6 @@ export function liveValidate<TValues extends FieldObservables>(
 
     // define the generic node change handler.
     const handleChanges = (node: keyof TValues) => {
-
         // The internal state of validation local for this `node`.
         let currentState = {
             global: globalState,
@@ -364,9 +336,7 @@ export function liveValidate<TValues extends FieldObservables>(
                     currentState,
                     localChangeCallback,
                 );
-
             } else {
-
                 // run the validators of the `node`.
                 const validationPromise = validateNode(
                     node,
@@ -401,7 +371,6 @@ export function liveValidate<TValues extends FieldObservables>(
 
     // return the subscription canceller.
     return () => {
-
         // support cancelling multiple times.
         if (!globalState.subscriptionIsActive) {
             return;

@@ -1,7 +1,4 @@
-import {
-    GraphCycleError,
-    NoSuchEdgeGraphError,
-} from './errors';
+import { GraphCycleError, NoSuchEdgeGraphError } from './errors';
 
 /**
  * The interface of a depth first search call.
@@ -30,7 +27,7 @@ export function createDfs<TNode>(edges: Map<TNode, Set<TNode>>, leavesOnly: bool
             throw new NoSuchEdgeGraphError(currentNode);
         }
 
-        currentEdges.forEach((node) => {
+        currentEdges.forEach(node => {
             if (!visited.has(node)) {
                 dfs(node);
             } else if (stack.indexOf(node) > -1) {

@@ -1,6 +1,4 @@
-import {
-    Graph,
-} from 'dependency-graph/graph';
+import { Graph } from 'dependency-graph/graph';
 
 export class MockGraph<TNode, TData> extends Graph<TNode, TData> {
     public getIncomingEdges() {

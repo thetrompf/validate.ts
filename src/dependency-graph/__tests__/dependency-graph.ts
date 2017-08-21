@@ -1,15 +1,6 @@
-import {
-    MockGraph
-} from 'dependency-graph/__mocks__/graph';
-
-import {
-    GraphCycleError,
-    NoSuchNodeGraphError,
-} from 'dependency-graph/errors';
-
-import {
-    Graph,
-} from 'dependency-graph/graph';
+import { MockGraph } from 'dependency-graph/__mocks__/graph';
+import { GraphCycleError, NoSuchNodeGraphError } from 'dependency-graph/errors';
+import { Graph } from 'dependency-graph/graph';
 
 test('hasNode returns true for added node', () => {
     const graph = new Graph<string, void>();
@@ -219,17 +210,11 @@ test('dependenciesOf returns the sub tree of the node in question', () => {
     expect(graph.dependenciesOf(b, true).size).toEqual(2);
     expect(graph.dependenciesOf(c, true).size).toEqual(2);
 
-    expect(
-        Array.from(graph.dependenciesOf(a, false)).sort()
-    ).toEqual([b, c, d, e, f, g]);
+    expect(Array.from(graph.dependenciesOf(a, false)).sort()).toEqual([b, c, d, e, f, g]);
 
-    expect(
-        Array.from(graph.dependenciesOf(b, false)).sort()
-    ).toEqual([d, e]);
+    expect(Array.from(graph.dependenciesOf(b, false)).sort()).toEqual([d, e]);
 
-    expect(
-        Array.from(graph.dependenciesOf(c, false)).sort()
-    ).toEqual([f, g]);
+    expect(Array.from(graph.dependenciesOf(c, false)).sort()).toEqual([f, g]);
 });
 
 test('dependantsOf returns all nodes that are depending on the node itself', () => {
@@ -273,33 +258,19 @@ test('dependantsOf returns all nodes that are depending on the node itself', () 
     expect(graph.dependantsOf(b).size).toEqual(1);
     expect(graph.dependantsOf(a).size).toEqual(0);
 
-    expect(
-        Array.from(graph.dependantsOf(g)).sort()
-    ).toEqual([a, c]);
+    expect(Array.from(graph.dependantsOf(g)).sort()).toEqual([a, c]);
 
-    expect(
-        Array.from(graph.dependantsOf(f)).sort()
-    ).toEqual([a, c]);
+    expect(Array.from(graph.dependantsOf(f)).sort()).toEqual([a, c]);
 
-    expect(
-        Array.from(graph.dependantsOf(e)).sort()
-    ).toEqual([a, b]);
+    expect(Array.from(graph.dependantsOf(e)).sort()).toEqual([a, b]);
 
-    expect(
-        Array.from(graph.dependantsOf(d)).sort()
-    ).toEqual([a, b]);
+    expect(Array.from(graph.dependantsOf(d)).sort()).toEqual([a, b]);
 
-    expect(
-        Array.from(graph.dependantsOf(c))
-    ).toEqual([a]);
+    expect(Array.from(graph.dependantsOf(c))).toEqual([a]);
 
-    expect(
-        Array.from(graph.dependantsOf(b))
-    ).toEqual([a]);
+    expect(Array.from(graph.dependantsOf(b))).toEqual([a]);
 
-    expect(
-        Array.from(graph.dependantsOf(a))
-    ).toEqual([]);
+    expect(Array.from(graph.dependantsOf(a))).toEqual([]);
 });
 
 test('resolving dependencies of a node that does not exist throws', () => {
@@ -406,9 +377,7 @@ test('overallOrder returns a legal execution path for graphs with disconnected s
     graph.addDependency(j, m);
     graph.addDependency(l, m);
 
-    expect(
-        Array.from(graph.overallOrder())
-    ).toEqual([f, b, c, a, e, h, d, g, m, l, k, i, j]);
+    expect(Array.from(graph.overallOrder())).toEqual([f, b, c, a, e, h, d, g, m, l, k, i, j]);
 });
 
 test('resolving immediate dependencies of node', () => {
@@ -433,15 +402,9 @@ test('resolving immediate dependencies of node', () => {
     graph.addDependency(b, d);
     graph.addDependency(b, e);
 
-    expect(
-        Array.from(graph.immediateDependenciesOf(a))
-    ).toEqual([b, c]);
+    expect(Array.from(graph.immediateDependenciesOf(a))).toEqual([b, c]);
 
-    expect(
-        Array.from(graph.immediateDependenciesOf(b))
-    ).toEqual([d, e]);
+    expect(Array.from(graph.immediateDependenciesOf(b))).toEqual([d, e]);
 
-    expect(
-        Array.from(graph.immediateDependenciesOf(c))
-    ).toHaveLength(0);
+    expect(Array.from(graph.immediateDependenciesOf(c))).toHaveLength(0);
 });

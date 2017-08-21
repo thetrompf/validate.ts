@@ -1,9 +1,6 @@
-import {
-    EventEmitter,
-} from 'events';
+import { EventEmitter } from 'events';
 
 export class Field extends EventEmitter {
-
     protected value: any;
 
     public constructor(value: any) {
@@ -33,7 +30,6 @@ export class Field extends EventEmitter {
 }
 
 export class FieldAsync extends Field {
-
     public getValue(): Promise<any> {
         return new Promise((resolve, reject) => {
             setTimeout(() => resolve(this.value), 100);

@@ -1,19 +1,7 @@
-import {
-    Field,
-    FieldAsync,
-} from 'validation/__mocks__/live-fields';
-
-import {
-    liveValidate,
-} from 'validation/live-validate';
-
-import {
-    ValidationError,
-} from 'validation/errors';
-
-import {
-    LiveValidationChangeMap,
-} from 'validation/utils';
+import { Field, FieldAsync } from 'validation/__mocks__/live-fields';
+import { ValidationError } from 'validation/errors';
+import { liveValidate } from 'validation/live-validate';
+import { LiveValidationChangeMap } from 'validation/utils';
 
 test('live validators are called when field emits change', async () => {
     expect.assertions(2);
@@ -24,7 +12,8 @@ test('live validators are called when field emits change', async () => {
     liveValidate(
         {
             field1: field1,
-        }, {
+        },
+        {
             field1: {
                 validators: [
                     async (value: any, dependencies: any): Promise<void> => {
@@ -42,7 +31,7 @@ test('live validators are called when field emits change', async () => {
     expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
-test('validators won\'t be called after subscriptions are cancelled', async () => {
+test("validators won't be called after subscriptions are cancelled", async () => {
     const field1 = new Field('value1');
     const changeHandler = jest.fn();
 
@@ -52,11 +41,10 @@ test('validators won\'t be called after subscriptions are cancelled', async () =
     const abortSubscriptions = liveValidate(
         {
             field1: field1,
-        }, {
+        },
+        {
             field1: {
-                validators: [
-                    validator,
-                ],
+                validators: [validator],
             },
         },
         changeHandler,
@@ -81,13 +69,14 @@ test('promised values are resolved when passed to validators', async () => {
 
     liveValidate(
         {
-            field1: field1
-        }, {
+            field1: field1,
+        },
+        {
             field1: {
                 validators: [
                     async (value: any) => {
                         expect(value).toEqual('async-value1');
-                    }
+                    },
                 ],
             },
         },
@@ -113,12 +102,11 @@ test('dependant nodes validators are run when node trigger change', async () => 
         {
             field1: field1,
             field2: field2,
-        }, {
+        },
+        {
             field2: {
                 dependencies: ['field1'],
-                validators: [
-                    field2Validator,
-                ],
+                validators: [field2Validator],
             },
         },
         changeHandler,
@@ -140,7 +128,8 @@ test('when dependant nodes fail errors are propagated to error handler', async (
         {
             field1: field1,
             field2: field2,
-        }, {
+        },
+        {
             field2: {
                 dependencies: ['field1'],
                 validators: [
@@ -152,7 +141,7 @@ test('when dependant nodes fail errors are propagated to error handler', async (
                 ],
             },
         },
-        (changes: LiveValidationChangeMap<{ field1: Field, field2: Field }>) => {
+        (changes: LiveValidationChangeMap<{ field1: Field; field2: Field }>) => {
             expect(changes.hasErrors).toBe(true);
             const field2Errors = changes.getErrorsForNode('field2') as ValidationError[];
             expect(field2Errors).not.toBeUndefined();
@@ -181,7 +170,8 @@ test('when a node validation fails, dependant nodes validators are not called', 
         {
             field1: field1,
             field2: field2,
-        }, {
+        },
+        {
             field1: {
                 validators: [
                     field1Validator,
@@ -190,16 +180,14 @@ test('when a node validation fails, dependant nodes validators are not called', 
                             throw new ValidationError('invalid value');
                         }
                     },
-                ]
+                ],
             },
             field2: {
                 dependencies: ['field1'],
-                validators: [
-                    field2Validator,
-                ],
+                validators: [field2Validator],
             },
         },
-        (changes: LiveValidationChangeMap<{ field1: Field, field2: Field }>) => {
+        (changes: LiveValidationChangeMap<{ field1: Field; field2: Field }>) => {
             expect(changes.hasErrors).toBe(true);
             const field1Errors = changes.getErrorsForNode('field1') as ValidationError[];
             const field2Errors = changes.getErrorsForNode('field2') as ValidationError[];
@@ -231,17 +219,14 @@ test('node with both constraints and dependants, calls dependants validators whe
         {
             field1: field1,
             field2: field2,
-        }, {
+        },
+        {
             field1: {
-                validators: [
-                    field1Validator,
-                ],
+                validators: [field1Validator],
             },
             field2: {
                 dependencies: ['field1'],
-                validators: [
-                    field2Validator,
-                ],
+                validators: [field2Validator],
             },
         },
         changeHandler,
@@ -277,40 +262,33 @@ test('validators beyond dependency level 2 is called', async () => {
             a: a,
             b: b,
             c: c,
-            d: d
-        }, {
+            d: d,
+        },
+        {
             a: {
-                validators: [
-                    aValidator,
-                ],
+                validators: [aValidator],
             },
             b: {
                 dependencies: ['a'],
-                validators: [
-                    bValidator,
-                ],
+                validators: [bValidator],
             },
             c: {
                 dependencies: ['b'],
-                validators: [
-                    cValidator,
-                ],
+                validators: [cValidator],
             },
             d: {
                 dependencies: ['c'],
-                validators: [
-                    dValidator,
-                ],
+                validators: [dValidator],
             },
         },
         changeHandler,
     );
 
-    a.setValue('A\'');
+    a.setValue("A'");
     await a.triggerChange();
 
-    expect(aValidator).toHaveBeenCalledWith('A\'', new Map(), {});
-    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', 'A\'']]), {});
+    expect(aValidator).toHaveBeenCalledWith("A'", new Map(), {});
+    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', "A'"]]), {});
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).toHaveBeenCalledWith('D', new Map([['c', 'C']]), {});
 
@@ -340,39 +318,32 @@ test('validators beyond 2nd level of dependency breaks the dependency chain', as
             b: b,
             c: c,
             d: d,
-        }, {
+        },
+        {
             a: {
-                validators: [
-                    aValidator,
-                ],
+                validators: [aValidator],
             },
             b: {
                 dependencies: ['a'],
-                validators: [
-                    bValidator,
-                ],
+                validators: [bValidator],
             },
             c: {
                 dependencies: ['b'],
-                validators: [
-                    cValidator,
-                ],
+                validators: [cValidator],
             },
             d: {
                 dependencies: ['c'],
-                validators: [
-                    dValidator,
-                ],
+                validators: [dValidator],
             },
         },
         changeHandler,
     );
 
-    a.setValue('A\'');
+    a.setValue("A'");
     await a.triggerChange();
 
-    expect(aValidator).toHaveBeenCalledWith('A\'', new Map(), {});
-    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', 'A\'']]), {});
+    expect(aValidator).toHaveBeenCalledWith("A'", new Map(), {});
+    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', "A'"]]), {});
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).not.toHaveBeenCalled();
 
@@ -392,39 +363,34 @@ test('dependant validators is run even if no validators defined on first level i
         {
             a: a,
             b: b,
-        }, {
+        },
+        {
             a: {
                 dependencies: <any>[],
             },
             b: {
                 dependencies: ['a'],
-                validators: [
-                    bValidator,
-                ],
+                validators: [bValidator],
             },
         },
         changeHandler,
     );
 
-    a.setValue('A\'');
+    a.setValue("A'");
     await a.triggerChange();
 
-    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', 'A\'']]), {});
+    expect(bValidator).toHaveBeenCalledWith('B', new Map([['a', "A'"]]), {});
     expect(changeHandler).toHaveBeenCalledWith(new LiveValidationChangeMap());
 });
 
 test('when a field triggers change, it exists in change map, with empty list of errors', async () => {
     expect.assertions(1);
     const a = new Field('A');
-    liveValidate(
-        { a: a },
-        {},
-        (changes: LiveValidationChangeMap<{ a: Field }>) => {
-            expect(changes.getErrorsForNode('a')).toHaveLength(0);
-        }
-    );
+    liveValidate({ a: a }, {}, (changes: LiveValidationChangeMap<{ a: Field }>) => {
+        expect(changes.getErrorsForNode('a')).toHaveLength(0);
+    });
 
-    a.setValue('A\'');
+    a.setValue("A'");
     return a.triggerChange();
 });
 
@@ -441,20 +407,18 @@ test('when a field passes its validation, it exists in change map, with empty li
         },
         {
             a: {
-                validators: [
-                    aValidator,
-                ],
+                validators: [aValidator],
             },
         },
         (changes: any) => {
             expect(changes.getErrorsForNode('a')).toHaveLength(0);
-        }
+        },
     );
 
-    a.setValue('A\'');
+    a.setValue("A'");
     await a.triggerChange();
 
-    expect(aValidator).toHaveBeenCalledWith('A\'', new Map, {});
+    expect(aValidator).toHaveBeenCalledWith("A'", new Map(), {});
 });
 
 test('when a field triggers change and has dependants, they appear in the change map', async () => {
@@ -471,9 +435,9 @@ test('when a field triggers change and has dependants, they appear in the change
         {
             b: {
                 dependencies: ['a'],
-            }
+            },
         },
-        (changes: LiveValidationChangeMap<{ a: Field, b: Field }>) => {
+        (changes: LiveValidationChangeMap<{ a: Field; b: Field }>) => {
             expect(changes.hasErrors).toBe(false);
             expect(Array.from(changes.keys())).toEqual(['a', 'b']);
             expect(changes.getErrorsForNode('a')).toEqual([]);
@@ -481,7 +445,7 @@ test('when a field triggers change and has dependants, they appear in the change
         },
     );
 
-    a.setValue('A\'');
+    a.setValue("A'");
     return a.triggerChange();
 });
 
@@ -501,22 +465,20 @@ test('when a field fails its validations, its dependants does not appear in chan
         },
         {
             a: {
-                validators: [
-                    aValidator,
-                ],
+                validators: [aValidator],
             },
             b: {
                 dependencies: ['a'],
-            }
+            },
         },
-        (changes: LiveValidationChangeMap<{ a: Field, b: Field }>) => {
+        (changes: LiveValidationChangeMap<{ a: Field; b: Field }>) => {
             expect(changes.hasErrors).toBe(true);
             expect(Array.from(changes.keys())).toEqual(['a']);
             expect(changes.getErrorsForNode('a')).toHaveLength(1);
         },
     );
 
-    a.setValue('A\'');
+    a.setValue("A'");
     return a.triggerChange();
 });
 
@@ -527,12 +489,16 @@ test('when field triggers change, if a later change triggers, and returns first,
 
     const aValidator = jest.fn();
     aValidator
-        .mockReturnValueOnce(new Promise((resolve, reject) => {
-            setTimeout(reject, 30);
-        }))
-        .mockReturnValueOnce(new Promise((resolve, reject) => {
-            setTimeout(resolve, 10);
-        }));
+        .mockReturnValueOnce(
+            new Promise((resolve, reject) => {
+                setTimeout(reject, 30);
+            }),
+        )
+        .mockReturnValueOnce(
+            new Promise((resolve, reject) => {
+                setTimeout(resolve, 10);
+            }),
+        );
 
     liveValidate(
         {
@@ -540,10 +506,8 @@ test('when field triggers change, if a later change triggers, and returns first,
         },
         {
             a: {
-                validators: [
-                    aValidator,
-                ],
-            }
+                validators: [aValidator],
+            },
         },
         (changes: LiveValidationChangeMap<{ a: Field }>) => {
             expect(changes.hasErrors).toBe(false);
@@ -563,8 +527,8 @@ test('when field triggers change, if a later change triggers, and returns first,
     await Promise.all(changePromises);
 
     expect(aValidator).toHaveBeenCalledTimes(2);
-    expect(aValidator).toHaveBeenCalledWith("A'", new Map, {});
-    expect(aValidator).toHaveBeenCalledWith("A''", new Map, {});
+    expect(aValidator).toHaveBeenCalledWith("A'", new Map(), {});
+    expect(aValidator).toHaveBeenCalledWith("A''", new Map(), {});
 });
 
 test('when subscriptions are cancelled and a long running validation returns, the change handler is not called', async () => {
@@ -573,9 +537,11 @@ test('when subscriptions are cancelled and a long running validation returns, th
     const aValidator = jest.fn();
     const changeHandler = jest.fn();
 
-    aValidator.mockReturnValue(new Promise((resolve, reject) => {
-        setTimeout(resolve, 30);
-    }));
+    aValidator.mockReturnValue(
+        new Promise((resolve, reject) => {
+            setTimeout(resolve, 30);
+        }),
+    );
 
     const cancelSubscriptions = liveValidate(
         {
@@ -583,10 +549,8 @@ test('when subscriptions are cancelled and a long running validation returns, th
         },
         {
             a: {
-                validators: [
-                    aValidator,
-                ],
-            }
+                validators: [aValidator],
+            },
         },
         changeHandler,
     );
@@ -610,9 +574,11 @@ test('validators in *next* level in dependecy graph is not called when subscript
     const bValidator = jest.fn();
     const changeHandler = jest.fn();
 
-    aValidator.mockReturnValue(new Promise((resolve, reject) => {
-        setTimeout(resolve, 30);
-    }));
+    aValidator.mockReturnValue(
+        new Promise((resolve, reject) => {
+            setTimeout(resolve, 30);
+        }),
+    );
     bValidator.mockReturnValue(Promise.resolve());
 
     const cancelSubscriptions = liveValidate(
@@ -622,15 +588,11 @@ test('validators in *next* level in dependecy graph is not called when subscript
         },
         {
             a: {
-                validators: [
-                    aValidator,
-                ],
+                validators: [aValidator],
             },
             b: {
                 dependencies: ['a'],
-                validators: [
-                    bValidator,
-                ],
+                validators: [bValidator],
             },
         },
         changeHandler,
