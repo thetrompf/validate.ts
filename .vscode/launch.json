@@ -5,15 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node2",
+            "type": "node",
             "request": "launch",
             "name": "Debug jest (launch)",
+            "protocol": "inspector",
             "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
             "args": [
                 "--runInBand",
                 "--no-cache",
-                "--env",
-                "jest-environment-node-debug",
                 "${relativeFile}"
             ],
             "cwd": "${workspaceRoot}",
@@ -27,8 +26,9 @@
             }
         },
         {
-            "type": "node2",
+            "type": "node",
             "request": "attach",
+            "protocol": "inspector",
             "name": "Debug jest (attach)",
             "port": 9229
         }
