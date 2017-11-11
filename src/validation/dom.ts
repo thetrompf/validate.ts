@@ -1,5 +1,5 @@
 import { ValidationAggregateError, ValidationError } from './errors';
-import { Constraints, LiveValidationChangeMap, ValueProvider } from './types';
+import { Constraints, ILiveValidationChangeMap, ValueProvider } from './types';
 
 export type HTMLFormValueElement =
     | HTMLButtonElement
@@ -20,10 +20,10 @@ export interface WrapOptions {
 }
 
 const defaultOptions: WrapOptions = {
-    feedbackSelector: null, // '.validation-feedback',
-    fieldSelector: '.form-field',
     editorSelector: '[name]',
     errorClass: 'has-errors',
+    feedbackSelector: null, // '.validation-feedback',
+    fieldSelector: '.form-field',
     live: false,
     static: true,
 };
@@ -97,7 +97,7 @@ function escapeHtml(content?: string): string {
 }
 
 function createLiveSetErrorsFn(formMap: FormMap, options: WrapOptions) {
-    return (changeMap: LiveValidationChangeMap<FormMap, ValidationError>) => {
+    return (changeMap: ILiveValidationChangeMap<FormMap, ValidationError>) => {
         changeMap.forEach((errors, field) => {
             const map = formMap[field];
             switch (errors.length) {

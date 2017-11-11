@@ -6,7 +6,7 @@
 export class GraphError extends Error {
     constructor(msg?: string) {
         super(msg);
-        Object.setPrototypeOf(this, GraphError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -18,7 +18,7 @@ export class GraphError extends Error {
 export class NoSuchNodeGraphError<K> extends GraphError {
     public constructor(node: K) {
         super(`Node '${node}' does not exist in graph`);
-        Object.setPrototypeOf(this, NoSuchNodeGraphError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -30,7 +30,7 @@ export class NoSuchNodeGraphError<K> extends GraphError {
 export class NoSuchEdgeGraphError<TNode> extends GraphError {
     public constructor(node: TNode) {
         super(`No edges found for node '${node}' in graph`);
-        Object.setPrototypeOf(this, NoSuchEdgeGraphError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -48,7 +48,7 @@ export class GraphCycleError<TNode> extends GraphError {
     public readonly cycle: TNode[];
     public constructor(cycle: TNode[]) {
         super('A cycle detected in the dependency graph');
-        Object.setPrototypeOf(this, GraphCycleError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
         this.cycle = cycle;
     }
 

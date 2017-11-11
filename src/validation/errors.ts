@@ -4,7 +4,7 @@
 export class ValidationError extends Error {
     constructor(message?: string) {
         super(message);
-        Object.setPrototypeOf(this, ValidationError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -14,7 +14,7 @@ export class ValidationError extends Error {
 export class ValidationTimeoutError extends ValidationError {
     constructor(message?: string) {
         super(message);
-        Object.setPrototypeOf(this, ValidationTimeoutError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -25,7 +25,7 @@ export class ValidationTimeoutError extends ValidationError {
 export class RequiredValidationError extends ValidationError {
     constructor(message?: string) {
         super(message);
-        Object.setPrototypeOf(this, RequiredValidationError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
@@ -38,7 +38,7 @@ export class ValidationAggregateError<TValues> extends ValidationError {
 
     public constructor(message?: string) {
         super(message);
-        Object.setPrototypeOf(this, ValidationAggregateError.prototype);
+        Object.setPrototypeOf(this, new.target.prototype);
         this._errors = new Map();
     }
 

@@ -1,6 +1,6 @@
 import { Graph } from '../dependency-graph/graph';
 import { ValidationError, ValidationTimeoutError } from './errors';
-import { Constraints, FieldValuesObject, LiveValidationChangeMap as ILiveValidationChangeMap } from './types';
+import { Constraints, FieldValuesObject, ILiveValidationChangeMap } from './types';
 
 /**
  * Add `dependencies` as outgoing edges from `node` in the `graph`.

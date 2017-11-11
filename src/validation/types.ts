@@ -42,7 +42,7 @@ export type Constraints<TValues> = {
  */
 export type NodeValidationErrorHandler = (e: any) => void;
 
-export interface LiveValidationChangeMap<TValues, TError> {
+export interface ILiveValidationChangeMap<TValues, TError> {
     readonly hasErrors: boolean;
     addError(node: keyof TValues, error: TError): void;
     entries(): IterableIterator<[keyof TValues, TError[]]>;
@@ -58,7 +58,7 @@ export interface LiveValidationChangeMap<TValues, TError> {
     values(): IterableIterator<TError[]>;
 }
 
-export type LiveValidationChangeHandler<TValues, TError> = (e: LiveValidationChangeMap<TValues, TError>) => void;
+export type LiveValidationChangeHandler<TValues, TError> = (e: ILiveValidationChangeMap<TValues, TError>) => void;
 
 export interface ValueProvider {
     addListener(event: string, callback: (cb?: (e: any) => void) => void): void;

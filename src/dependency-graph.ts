@@ -1,2 +1,3 @@
-export { Graph } from './dependency-graph/graph';
-export { GraphError, GraphCycleError, NoSuchEdgeGraphError, NoSuchNodeGraphError } from './dependency-graph/errors';
+export * from './dependency-graph/graph';
+export * from './dependency-graph/errors';
+export * from './dependency-graph/utils';
