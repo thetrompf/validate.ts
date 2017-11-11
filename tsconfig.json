@@ -1,13 +1,11 @@
 {
     "compilerOptions": {
-        "baseUrl": "src",
         "importHelpers": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "noEmitHelpers": true,
         "noImplicitAny": true,
         "outDir": "build",
-        "strictNullChecks": true,
         "target": "es2015",
         "strict": true,
         "lib": [

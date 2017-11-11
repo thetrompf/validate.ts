@@ -1,8 +1,8 @@
-import { GraphCycleError } from 'dependency-graph/errors';
-import { ValidationAggregateError, ValidationError, ValidationTimeoutError } from 'validation/errors';
-import { VALIDATION_TIMEOUT } from 'validation/utils';
-import { validate } from 'validation/validate';
-import { requiredValidator } from 'validation/validators';
+import { GraphCycleError } from '../../dependency-graph/errors';
+import { ValidationAggregateError, ValidationError, ValidationTimeoutError } from '../errors';
+import { VALIDATION_TIMEOUT } from '../utils';
+import { validate } from '../validate';
+import { requiredValidator } from '../validators';
 
 test('simple call to public interface with empty value and empty constraints', async () => {
     const result = await validate({}, {});

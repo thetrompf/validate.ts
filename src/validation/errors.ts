@@ -33,6 +33,7 @@ export class RequiredValidationError extends ValidationError {
  * The aggregated error to be thrown to the caller.
  */
 export class ValidationAggregateError<TValues> extends ValidationError {
+    // tslint:disable-next-line:variable-name
     private _errors: Map<keyof TValues, ValidationError[]>;
 
     public constructor(message?: string) {

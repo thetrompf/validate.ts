@@ -28,6 +28,7 @@ export function addAllConstraints<K, V>(graph: Graph<K, V>, nodes: K[], dependen
  */
 export function buildDependencyMap<T>(constraints: Constraints<T>): Map<keyof T, Set<keyof T>> {
     const dependencyMap = new Map<keyof T, Set<keyof T>>();
+    // tslint:disable-next-line:forin
     for (const node in constraints) {
         const nodeConstraint = constraints[node];
         if (nodeConstraint && nodeConstraint.dependencies != null) {
@@ -58,8 +59,8 @@ export async function getPromisedDependencyMap<T>(
     for (const key of Array.from(dependencies.values())) {
         const value = values[key];
         if (value != null) {
-            if (value instanceof Promise) {
-                promises.push(value.then(v => map.set(key, v)));
+            if ((value as any) instanceof Promise) {
+                promises.push((value as Promise<keyof T>).then(v => map.set(key, v)));
             } else {
                 map.set(key, value);
             }
@@ -109,31 +110,43 @@ export function isEmpty(value: any): boolean {
  * The map object returned to the live validation change handler.
  */
 export class LiveValidationChangeMap<TValues> implements ILiveValidationChangeMap<TValues, ValidationError> {
-    private _errors: Map<keyof TValues, ValidationError[]>;
+    public get hasErrors(): boolean {
+        for (const errors of Array.from(this.errors.values())) {
+            if (errors.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    // tslint:disable-next-line:variable-name
+    private errors: Map<keyof TValues, ValidationError[]>;
 
     public constructor() {
-        this._errors = new Map();
+        this.errors = new Map();
     }
 
-    public values() {
-        return this._errors.values();
+    public addError(node: keyof TValues, error: ValidationError): void {
+        if (this.errors.has(node)) {
+            (this.errors.get(node) as ValidationError[]).push(error);
+        } else {
+            this.errors.set(node, [error]);
+        }
     }
 
     public entries() {
-        return this._errors.entries();
+        return this.errors.entries();
     }
 
-    public keys() {
-        return this._errors.keys();
-    }
-
-    public getErrorsForNode(node: keyof TValues) {
-        return this._errors.get(node);
+    public forEach(
+        callbackFn: (value: ValidationError[], key: keyof TValues, map: Map<keyof TValues, ValidationError[]>) => void,
+        thisArg?: any,
+    ): void {
+        this.errors.forEach(callbackFn, thisArg);
     }
 
     public getAllErrors() {
         const errorMap = new Map<keyof TValues, ValidationError[]>();
-        this._errors.forEach((errors: ValidationError[], node: keyof TValues) => {
+        this.errors.forEach((errors: ValidationError[], node: keyof TValues) => {
             if (errors.length > 0) {
                 errorMap.set(node, errors);
             }
@@ -141,33 +154,17 @@ export class LiveValidationChangeMap<TValues> implements ILiveValidationChangeMa
         return errorMap;
     }
 
-    public forEach(
-        callbackFn: (value: ValidationError[], key: keyof TValues, map: Map<keyof TValues, ValidationError[]>) => void,
-        thisArg?: any,
-    ): void {
-        this._errors.forEach(callbackFn, thisArg);
+    public getErrorsForNode(node: keyof TValues) {
+        return this.errors.get(node);
     }
 
-    public get hasErrors(): boolean {
-        for (const errors of Array.from(this._errors.values())) {
-            if (errors.length > 0) {
-                return true;
-            }
-        }
-        return false;
+    public keys() {
+        return this.errors.keys();
     }
 
     public markNodeAsChanged(node: keyof TValues) {
-        if (!this._errors.has(node)) {
-            this._errors.set(node, []);
-        }
-    }
-
-    public addError(node: keyof TValues, error: ValidationError): void {
-        if (this._errors.has(node)) {
-            (this._errors.get(node) as ValidationError[]).push(error);
-        } else {
-            this._errors.set(node, [error]);
+        if (!this.errors.has(node)) {
+            this.errors.set(node, []);
         }
     }
 
@@ -175,7 +172,7 @@ export class LiveValidationChangeMap<TValues> implements ILiveValidationChangeMa
         let result = `
 Field changes with errors:`;
 
-        this._errors.forEach((errors, node) => {
+        this.errors.forEach((errors, node) => {
             result += `
   - ${node}:`;
             if (errors.length > 0) {
@@ -187,5 +184,9 @@ Field changes with errors:`;
             }
         });
         return result;
+    }
+
+    public values() {
+        return this.errors.values();
     }
 }

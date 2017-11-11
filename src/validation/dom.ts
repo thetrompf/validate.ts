@@ -10,11 +10,12 @@ export type HTMLFormValueElement =
     | HTMLTextAreaElement;
 
 export interface WrapOptions {
-    feedbackSelector: string | null;
-    fieldSelector: string;
     editorSelector: string;
     errorClass: string;
+    feedbackSelector: string | null;
+    fieldSelector: string;
     live: boolean;
+    // tslint:disable-next-line:no-reserved-keywords
     static: boolean;
 }
 
@@ -29,9 +30,9 @@ const defaultOptions: WrapOptions = {
 
 export interface FormMap {
     [fieldName: string]: {
-        fieldElement: Element;
         editorElement: HTMLFormValueElement | null;
         feedbackElement: Element | null;
+        fieldElement: Element;
         valueProvider: ValueProvider | null;
     };
 }
@@ -41,13 +42,15 @@ function createClearErrorsFn(formMap: FormMap, options: WrapOptions) {
         if (typeof field === 'string') {
             const map = formMap[field];
             if (map.feedbackElement) {
+                // tslint:disable-next-line:no-inner-html
                 map.feedbackElement.innerHTML = '';
             }
             map.fieldElement.classList.remove(options.errorClass);
         } else {
-            for (const field of Object.keys(formMap)) {
-                const map = formMap[field];
+            for (const f of Object.keys(formMap)) {
+                const map = formMap[f];
                 if (map.feedbackElement) {
+                    // tslint:disable-next-line:no-inner-html
                     map.feedbackElement.innerHTML = '';
                 }
                 map.fieldElement.classList.remove(options.errorClass);
@@ -64,9 +67,11 @@ function createStaticSetErrorsFn(formMap: FormMap, options: WrapOptions) {
             if (feedbackElement != null) {
                 switch (validationErrors.length) {
                     case 1:
+                        // tslint:disable-next-line:no-inner-html
                         feedbackElement.innerHTML = escapeHtml(validationErrors[0].message);
                         break;
                     default:
+                        // tslint:disable-next-line:no-inner-html
                         feedbackElement.innerHTML = `
                             <ul>
                                 <li>${validationErrors.map(e => escapeHtml(e.message)).join('</li><li>')}</li>
@@ -98,18 +103,21 @@ function createLiveSetErrorsFn(formMap: FormMap, options: WrapOptions) {
             switch (errors.length) {
                 case 0:
                     if (map.feedbackElement) {
+                        // tslint:disable-next-line:no-inner-html
                         map.feedbackElement.innerHTML = '';
                     }
                     map.fieldElement.classList.remove(options.errorClass);
                     break;
                 case 1:
                     if (map.feedbackElement) {
+                        // tslint:disable-next-line:no-inner-html
                         map.feedbackElement.innerHTML = escapeHtml(errors[0].message);
                     }
                     map.fieldElement.classList.add(options.errorClass);
                     break;
                 default:
                     if (map.feedbackElement) {
+                        // tslint:disable-next-line:no-inner-html
                         map.feedbackElement.innerHTML = `
                             <ul>
                                 <li>${errors.map(e => escapeHtml(e.message)).join('</li><li>')}</li>
@@ -125,12 +133,12 @@ function createLiveSetErrorsFn(formMap: FormMap, options: WrapOptions) {
 
 export function createValueProvider(editor: HTMLFormValueElement): ValueProvider {
     return {
-        getValue: (): any => {
-            return editor.value;
-        },
         addListener: (event: string, ...args: any[]) => {
             args.unshift(event === 'change' ? 'input' : event);
             editor.addEventListener.call(editor, ...args);
+        },
+        getValue: (): any => {
+            return editor.value;
         },
         removeListener: (event: string, ...args: any[]) => {
             args.unshift(event === 'change' ? 'input' : event);
@@ -172,14 +180,14 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
     const result = {
         clearErrors: createClearErrorsFn(formMap, resolvedOptions),
         formMap: formMap,
-        setStaticErrors: resolvedOptions.static ? createStaticSetErrorsFn(formMap, resolvedOptions) : null,
         setLiveErrors: resolvedOptions.live ? createLiveSetErrorsFn(formMap, resolvedOptions) : null,
+        setStaticErrors: resolvedOptions.static ? createStaticSetErrorsFn(formMap, resolvedOptions) : null,
     };
 
     if (resolvedOptions.static) {
         Object.defineProperty(result, 'values', {
-            enumerable: true,
             configurable: false,
+            enumerable: true,
             get: () => {
                 const res = {} as any;
                 for (const field of Object.keys(formMap)) {
@@ -192,8 +200,8 @@ export function getFormValidationObject(form: HTMLFormElement, options?: Partial
 
     if (resolvedOptions.live) {
         Object.defineProperty(result, 'valueProviders', {
-            enumerable: true,
             configurable: false,
+            enumerable: true,
             get: () => {
                 const res = {} as any;
                 for (const field of Object.keys(formMap)) {

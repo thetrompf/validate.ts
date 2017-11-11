@@ -13,7 +13,7 @@ import {
     ValueProvider,
 } from './types';
 
-import { addAllConstraints, buildDependencyMap, LiveValidationChangeMap, validationTimeout } from './utils';
+import { addAllConstraints, buildDependencyMap, validationTimeout, LiveValidationChangeMap } from './utils';
 
 /**
  * Return a map with all the values of the `dependencies` resolved,
@@ -60,7 +60,7 @@ function getErrorHandlerForNode<TValues>(
     node: keyof TValues,
     changeMap: LiveValidationChangeMap<TValues>,
 ): NodeValidationErrorHandler {
-    return function(e: any): void {
+    return (e: Error): void => {
         if (e instanceof ValidationError) {
             changeMap.addError(node, e);
             return;
@@ -70,10 +70,10 @@ function getErrorHandlerForNode<TValues>(
 }
 
 interface ValidationNodeState {
-    version: number;
     global: {
         subscriptionIsActive: boolean;
     };
+    version: number;
 }
 
 /**
@@ -103,7 +103,7 @@ async function validateNode<TValues extends FieldObservables>(
     // This adds a bit to the complexity of the caller,
     // in trade for a considered amount of performance.
     const constraint = constraints[node];
-    if (constraint == undefined || constraint.validators == undefined) {
+    if (constraint === undefined || constraint.validators === undefined) {
         // Don't proceed if subscriptions has been cancelled.
         if (!nodeState.global.subscriptionIsActive) {
             return;
@@ -121,38 +121,39 @@ async function validateNode<TValues extends FieldObservables>(
             }
 
             // Race for the validation dependency values.
-            return Promise.race([
-                validationTimeout(),
-                getPromisedDependencyMap(values, dependencyMap.get(node)),
-            ]).then((dependencies: Map<keyof TValues, any>) => {
-                // This check has already been made,
-                // but in async context the type checker
-                // thinks it could have been mutated in the meantime.
-                if (!nodeState.global.subscriptionIsActive || constraint.validators == null) {
-                    return;
-                }
-
-                const dependantValidationTimeout = validationTimeout();
-                return Promise.all(
-                    constraint.validators.map((validate: Validator<TValues>) => {
-                        // Run the validators of the field,
-                        // race all the validation for timeout.
-                        return Promise.race([
-                            dependantValidationTimeout,
-                            validate(value, dependencies, {}).catch(globalChangeCallback),
-                        ]);
-                    }),
-                ).then(() => {
-                    // Opt-out of the chain if an error has occured
-                    // or
-                    if (changeMap.hasErrors || !nodeState.global.subscriptionIsActive) {
+            return Promise.race([validationTimeout(), getPromisedDependencyMap(values, dependencyMap.get(node))]).then(
+                (dependencies: Map<keyof TValues, any> | void) => {
+                    // This check has already been made,
+                    // but in async context the type checker
+                    // thinks it could have been mutated in the meantime.
+                    if (!nodeState.global.subscriptionIsActive || constraint.validators == null) {
                         return;
                     }
 
-                    // Run validation of the dependants of this node.
-                    return validateDendencies();
-                });
-            });
+                    const dependantValidationTimeout = validationTimeout();
+                    return Promise.all(
+                        constraint.validators.map((validate: Validator<TValues>) => {
+                            // Run the validators of the field,
+                            // race all the validation for timeout.
+                            return Promise.race([
+                                dependantValidationTimeout,
+                                validate(value, dependencies as Map<keyof TValues, any>, {}).catch(
+                                    globalChangeCallback,
+                                ),
+                            ]);
+                        }),
+                    ).then(() => {
+                        // Opt-out of the chain if an error has occured
+                        // or
+                        if (changeMap.hasErrors || !nodeState.global.subscriptionIsActive) {
+                            return;
+                        }
+
+                        // Run validation of the dependants of this node.
+                        return validateDendencies();
+                    });
+                },
+            );
         }, globalChangeCallback)
         .catch(globalChangeCallback);
 }
@@ -222,7 +223,7 @@ function unwrapErrors<TValues>(
     globalChangeCallback: LiveValidationChangeHandler<TValues, ValidationError>,
     version: number,
     nodeState: ValidationNodeState,
-    localChangeCallback?: Function,
+    localChangeCallback?: (e?: any) => void,
 ): Promise<void> {
     return validationPromise.then(
         () => {
@@ -285,12 +286,12 @@ export function liveValidate<TValues extends FieldObservables>(
     // define the generic node change handler.
     const handleChanges = (node: keyof TValues) => {
         // The internal state of validation local for this `node`.
-        let currentState = {
+        const currentState = {
             global: globalState,
             version: 0,
         };
 
-        return (localChangeCallback?: Function) => {
+        return (localChangeCallback?: (e?: any) => void) => {
             if (!globalState.subscriptionIsActive) {
                 if (typeof localChangeCallback === 'function') {
                     localChangeCallback();
@@ -312,7 +313,7 @@ export function liveValidate<TValues extends FieldObservables>(
 
             // if no constraints defined on `node`
             // run the validators of its dependencies.
-            if (constraint == undefined) {
+            if (constraint === undefined) {
                 // mark this node for change,
                 // event though it has no constraints,
                 // it has still changed in temrs of live validation.
@@ -362,11 +363,14 @@ export function liveValidate<TValues extends FieldObservables>(
         };
     };
     // attach change listeners to all the nodes.
-    for (const node in nodes) {
+    // tslint:disable-next-line:forin
+    for (const node of Object.keys(nodes)) {
         const valueProvider = nodes[node];
         const keyChangeHandler = handleChanges(node);
-        subscriptions.set(valueProvider, keyChangeHandler);
-        valueProvider.addListener('change', keyChangeHandler);
+        if (keyChangeHandler != null) {
+            subscriptions.set(valueProvider, keyChangeHandler);
+            valueProvider.addListener('change', keyChangeHandler as any);
+        }
     }
 
     // return the subscription canceller.

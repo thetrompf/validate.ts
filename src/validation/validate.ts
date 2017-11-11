@@ -50,14 +50,14 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
     // Loop through the dependency graph in a resolved execution path.
     for (const key of Array.from(graph.overallOrder().values())) {
         const constraint = constraints[key];
-        if (constraint != undefined) {
+        if (constraint !== undefined) {
             // Create error handler for this `key`.
             const keyValidationErrorsHandler = handleValidationErrors(key);
 
             // Wrap asynchronous value in a promise
             // to normalize the handling of values.
             let value = values[key];
-            if (!(value instanceof Promise)) {
+            if (!((value as any) instanceof Promise)) {
                 value = Promise.resolve(value);
             }
 
@@ -66,13 +66,13 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
             // for waiting the whole result at the end.
             promises.push(
                 Promise.race([validationTimeout(), value])
-                    .then((value: any) => {
+                    .then((val: any) => {
                         if (constraint.validators) {
                             // Retrieve resolved dependencies to use in the validators.
                             return Promise.race([
                                 validationTimeout(),
                                 getPromisedDependencyMap<T>(values, dependencyMap.get(key)),
-                            ]).then((dependencies: Map<keyof T, any>): any => {
+                            ]).then((dependencies: Map<keyof T, any> | void): any => {
                                 // Run all validators, and race with the timeout.
                                 if (constraint.validators == null) {
                                     return;
@@ -87,7 +87,7 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
                                     constraint.validators.map((validator: Validator<T>) => {
                                         return Promise.race([
                                             keyValidationTimeout,
-                                            validator(value, dependencies, {})
+                                            validator(val, dependencies as Map<keyof T, any>, {})
                                                 // Handle the validation error up front
                                                 // and add it to the aggregated error.
                                                 .catch(keyValidationErrorsHandler),

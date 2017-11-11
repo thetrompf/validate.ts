@@ -1,58 +1,19 @@
 {
     "author": "Brian K. Christensen, Resem.pl ltd. <bkc@resem.pl>",
     "dependencies": {
-        "tslib": "^1.7.1"
+        "tslib": "^1.8.0"
     },
     "devDependencies": {
-        "@types/jest": "^20.0.7",
-        "@types/node": "^8.0.24",
-        "eslint": "^4.5.0",
-        "eslint-config-airbnb": "^15.1.0",
-        "eslint-plugin-import": "^2.7.0",
-        "eslint-plugin-jsx-a11y": "^6.0.2",
-        "eslint-plugin-react": "^7.2.1",
-        "jest": "^20.0.4",
-        "jest-environment-node-debug": "^2.0.0",
-        "prettier": "^1.5.3",
-        "serve": "^6.0.6",
-        "ts-jest": "^20.0.10",
-        "tslint": "^5.6.0",
-        "typescript": "^2.4.2",
-        "uglify-js": "^3.0.28"
-    },
-    "jest": {
-        "collectCoverage": false,
-        "coveragePathIgnorePatterns": [
-            "/node_modules/",
-            "/__tests__/.*\\.ts$"
-        ],
-        "globals": {
-            "ts-jest": {
-                "tsConfigFile": "tsconfig.test.json"
-            }
-        },
-        "mapCoverage": true,
-        "moduleFileExtensions": [
-            "ts",
-            "js"
-        ],
-        "moduleDirectories": [
-            "node_modules"
-        ],
-        "modulePaths": [
-            "<rootDir>/src/"
-        ],
-        "modulePathIgnorePatterns": [
-            "<rootDir>/build/",
-            "<rootDir>/dist/",
-            "<rootDir>/lib/",
-            "<rootDir>/lib2015/"
-        ],
-        "testEnvironment": "node",
-        "testRegex": "/__tests__/.*\\.ts$",
-        "transform": {
-            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-        }
+        "@types/jest": "^21.1.6",
+        "@types/node": "^8.0.51",
+        "jest": "^21.2.1",
+        "prettier": "^1.8.2",
+        "serve": "^6.4.1",
+        "ts-jest": "^21.2.1",
+        "tslint": "^5.8.0",
+        "tslint-secoya": "^1.0.6",
+        "typescript": "^2.6.1",
+        "uglify-js": "^3.1.8"
     },
     "license": "BSD-3-Clause",
     "main": "lib/validate.js",
@@ -82,11 +43,10 @@
         "compress:dist-amd": "uglifyjs --compress warnings=false --mangle --screw-ie8 --acorn --output dist/amd/validate.min.js -- dist/amd/validate.js",
         "compress:dist-system": "uglifyjs --compress warnings=false --mangle --screw-ie8 --acorn --output dist/system/validate.min.js -- dist/system/validate.js",
         "coverage": "yarn clean:coverage && jest --coverage",
-        "fmt": "prettier --write --print-width 120 --tab-width 4 --single-quote --trailing-comma all --parser typescript 'src/**/*.ts'",
+        "fmt": "prettier --write -l 'src/**/*.ts'",
         "lint": "tslint .",
         "prepublishOnly": "test -n \"$NPM_TOKEN\" || (>&2 echo 'Only publishing through CI is supported' && exit 1)",
         "serve:examples": "yarn build:dist-amd && serve --ignore='.vscode/,coverage/,dist/system/,node_modules/,src/,.eslintrc.json,.gitignore,.gitlab-ci.yml,.npmignore,CHANGELOG.md,LICENSE,README.md,npm-shrinkwrap.json,package.json,tsconfig.dist.amd.json,tsconfig.dist.system.json,tsconfig.json,tsconfig.lib.commonjs.json,tsconfig.lib.es2015.json,tsconfig.test.json,tslint.json,yarn.lock'",
-        "test:debug": "node --nolazy --inspect-brk node_modules/.bin/jest --no-cache --runInBand --env jest-environment-node-debug",
         "test": "jest"
     },
     "types": "types/validate.d.ts",

@@ -1,6 +1,6 @@
-import { MockGraph } from 'dependency-graph/__mocks__/graph';
-import { GraphCycleError, NoSuchNodeGraphError } from 'dependency-graph/errors';
-import { Graph } from 'dependency-graph/graph';
+import { MockGraph } from '../__mocks__/graph';
+import { GraphCycleError, NoSuchNodeGraphError } from '../errors';
+import { Graph } from '../graph';
 
 test('hasNode returns true for added node', () => {
     const graph = new Graph<string, void>();

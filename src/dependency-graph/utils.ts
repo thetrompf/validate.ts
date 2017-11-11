@@ -3,9 +3,7 @@ import { GraphCycleError, NoSuchEdgeGraphError } from './errors';
 /**
  * The interface of a depth first search call.
  */
-export interface DFS<TNode> {
-    (node: TNode): void;
-}
+export type DFS<TNode> = (node: TNode) => void;
 
 /**
  * Utility function for creating a depth first search function through the `edges`
@@ -18,6 +16,7 @@ export function createDfs<TNode>(edges: Map<TNode, Set<TNode>>, leavesOnly: bool
     const stack: TNode[] = [];
     const visited: Set<TNode> = new Set();
 
+    // tslint:disable-next-line:no-unnecessary-local-variable
     const dfs = (currentNode: TNode): void => {
         visited.add(currentNode);
         stack.push(currentNode);

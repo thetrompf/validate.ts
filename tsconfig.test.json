@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "baseUrl": "src",
         "importHelpers": true,
         "inlineSourceMap": true,
         "inlineSources": true,
@@ -9,7 +8,7 @@
         "noEmitHelpers": true,
         "noImplicitAny": true,
         "outDir": "build",
-        "strictNullChecks": true,
+        "strict": true,
         "target": "es2015",
         "lib": [
             "es2015"

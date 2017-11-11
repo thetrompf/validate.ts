@@ -4,9 +4,7 @@ import { ValidationAggregateError } from './errors';
 /**
  * The interface of a validator function.
  */
-export interface Validator<T> {
-    (value: any, dependencies: Map<keyof T, any>, options: any): Promise<void>;
-}
+export type Validator<T> = (value: any, dependencies: Map<keyof T, any>, options: any) => Promise<void>;
 
 /**
  * The interface for field values to validate.
@@ -42,34 +40,30 @@ export type Constraints<TValues> = {
  * The interface of both validation and non-validation
  * errors that occurs during validation of a single node.
  */
-export interface NodeValidationErrorHandler {
-    (e: any): void;
-}
+export type NodeValidationErrorHandler = (e: any) => void;
 
 export interface LiveValidationChangeMap<TValues, TError> {
+    readonly hasErrors: boolean;
     addError(node: keyof TValues, error: TError): void;
     entries(): IterableIterator<[keyof TValues, TError[]]>;
     forEach(
         callbackFn: (value: TError[], key: keyof TValues, map: Map<keyof TValues, TError[]>) => void,
         thisArg?: any,
     ): void;
-    getErrorsForNode(node: keyof TValues): TError[] | undefined;
     getAllErrors(): Map<keyof TValues, TError[]>;
-    readonly hasErrors: boolean;
+    getErrorsForNode(node: keyof TValues): TError[] | undefined;
     keys(): IterableIterator<keyof TValues>;
     markNodeAsChanged(node: keyof TValues): void;
-    values(): IterableIterator<TError[]>;
     toString(): string;
+    values(): IterableIterator<TError[]>;
 }
 
-export interface LiveValidationChangeHandler<TValues, TError> {
-    (e: LiveValidationChangeMap<TValues, TError>): void;
-}
+export type LiveValidationChangeHandler<TValues, TError> = (e: LiveValidationChangeMap<TValues, TError>) => void;
 
 export interface ValueProvider {
+    addListener(event: string, callback: (cb?: (e: any) => void) => void): void;
     getValue(): any;
-    addListener(event: string, callback: (cb?: Function) => void): void;
-    removeListener(event: string, callback: (cb?: Function) => void): void;
+    removeListener(event: string, callback: (cb?: (e: any) => void) => void): void;
 }
 
 export interface FieldObservables {
@@ -80,14 +74,8 @@ export interface FieldObservables {
  * This interface represents the function returned from
  * `liveValidate` to cancelled the current subscription.
  */
-export interface SubscriptionCanceller {
-    (): void;
-}
+export type SubscriptionCanceller = () => void;
 
-export interface ValidationErrorHandler<T> {
-    (e: ValidationAggregateError<T>): void;
-}
+export type ValidationErrorHandler<T> = (e: ValidationAggregateError<T>) => void;
 
-export interface LiveValueChangeHandler {
-    (): void;
-}
+export type LiveValueChangeHandler = () => void;

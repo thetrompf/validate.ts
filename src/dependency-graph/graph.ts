@@ -8,70 +8,23 @@ import { createDfs } from './utils';
 export class Graph<TNode, TData> {
     /**
      * This property is only protected for testing purposes.
-     **/
+     */
     protected incomingEdges: Map<TNode, Set<TNode>>;
-
-    /**
-     * This property is only protected for testing purposes.
-     **/
-    protected outgoingEdges: Map<TNode, Set<TNode>>;
 
     /**
      * This property is only protected for testing purposes.
      */
     protected nodes: Map<TNode, TData>;
 
+    /**
+     * This property is only protected for testing purposes.
+     */
+    protected outgoingEdges: Map<TNode, Set<TNode>>;
+
     public constructor() {
         this.nodes = new Map();
         this.incomingEdges = new Map();
         this.outgoingEdges = new Map();
-    }
-
-    /**
-     * Add an independant `node` to the graph,
-     * and attach `data` to it.
-     *
-     * If the `node` already exists,
-     * the call would be a no-op.
-     */
-    public addNode(node: TNode, data: TData): void {
-        if (!this.nodes.has(node)) {
-            this.nodes.set(node, data);
-
-            this.incomingEdges.set(node, new Set());
-            this.outgoingEdges.set(node, new Set());
-        }
-    }
-
-    /**
-     * Retrieve `data` from the `node`.
-     *
-     * If the `node` doesn't exist it will throw `NoSuchNodeGraphError`.
-     */
-    public getNodeData(node: TNode): TData {
-        const data = this.nodes.get(node);
-        if (data == null) {
-            throw new NoSuchNodeGraphError(node);
-        }
-        return data;
-    }
-
-    /**
-     * Set new `data` on the `node`.
-     * If the `node` doesn't exist it will throw `NoSuchNodeGraphError`.
-     */
-    public setNodeData(node: TNode, data: TData): void {
-        if (!this.nodes.has(node)) {
-            throw new NoSuchNodeGraphError(node);
-        }
-        this.nodes.set(node, data);
-    }
-
-    /**
-     * Returns true if the `node` exists in the graph.
-     */
-    public hasNode(node: TNode): boolean {
-        return this.nodes.has(node);
     }
 
     /**
@@ -97,20 +50,40 @@ export class Graph<TNode, TData> {
     }
 
     /**
-     * Remove an edge between `fromNode` and `toNode`.
+     * Add an independant `node` to the graph,
+     * and attach `data` to it.
      *
-     * If `fromNode` or `toNode` don't exist
-     * a `NoSuchNodeGraphError` is thrown.
+     * If the `node` already exists,
+     * the call would be a no-op.
      */
-    public removeDependency(fromNode: TNode, toNode: TNode): void {
-        const outgoingEdges = this.outgoingEdges.get(fromNode);
-        if (outgoingEdges != null) {
-            outgoingEdges.delete(toNode);
-        }
+    public addNode(node: TNode, data: TData): void {
+        if (!this.nodes.has(node)) {
+            this.nodes.set(node, data);
 
-        const incomingEdges = this.incomingEdges.get(toNode);
-        if (incomingEdges != null) {
-            incomingEdges.delete(fromNode);
+            this.incomingEdges.set(node, new Set());
+            this.outgoingEdges.set(node, new Set());
+        }
+    }
+
+    /**
+     * Return a set of all the nodes, that depends on this `node`.
+     *
+     * If `leavesOnly` is true, only the leaves of the sub-graph
+     *    this `node` depends on will be returned.
+     * If `node` does not exist in the graph
+     *    a `NoSuchNodeGraphError` is thrown.
+     */
+    public dependantsOf(node: TNode, leavesOnly: boolean = false): Set<TNode> {
+        if (this.nodes.has(node)) {
+            const result = new Set<TNode>();
+            const dfs = createDfs(this.incomingEdges, leavesOnly, result);
+
+            dfs(node);
+            result.delete(node);
+
+            return result;
+        } else {
+            throw new NoSuchNodeGraphError(node);
         }
     }
 
@@ -137,25 +110,23 @@ export class Graph<TNode, TData> {
     }
 
     /**
-     * Return a set of all the nodes, that depends on this `node`.
+     * Retrieve `data` from the `node`.
      *
-     * If `leavesOnly` is true, only the leaves of the sub-graph
-     *    this `node` depends on will be returned.
-     * If `node` does not exist in the graph
-     *    a `NoSuchNodeGraphError` is thrown.
+     * If the `node` doesn't exist it will throw `NoSuchNodeGraphError`.
      */
-    public dependantsOf(node: TNode, leavesOnly: boolean = false): Set<TNode> {
-        if (this.nodes.has(node)) {
-            const result = new Set<TNode>();
-            const dfs = createDfs(this.incomingEdges, leavesOnly, result);
-
-            dfs(node);
-            result.delete(node);
-
-            return result;
-        } else {
+    public getNodeData(node: TNode): TData {
+        const data = this.nodes.get(node);
+        if (data == null) {
             throw new NoSuchNodeGraphError(node);
         }
+        return data;
+    }
+
+    /**
+     * Returns true if the `node` exists in the graph.
+     */
+    public hasNode(node: TNode): boolean {
+        return this.nodes.has(node);
     }
 
     /**
@@ -203,5 +174,34 @@ export class Graph<TNode, TData> {
             .forEach(dfs);
 
         return result;
+    }
+
+    /**
+     * Remove an edge between `fromNode` and `toNode`.
+     *
+     * If `fromNode` or `toNode` don't exist
+     * a `NoSuchNodeGraphError` is thrown.
+     */
+    public removeDependency(fromNode: TNode, toNode: TNode): void {
+        const outgoingEdges = this.outgoingEdges.get(fromNode);
+        if (outgoingEdges != null) {
+            outgoingEdges.delete(toNode);
+        }
+
+        const incomingEdges = this.incomingEdges.get(toNode);
+        if (incomingEdges != null) {
+            incomingEdges.delete(fromNode);
+        }
+    }
+
+    /**
+     * Set new `data` on the `node`.
+     * If the `node` doesn't exist it will throw `NoSuchNodeGraphError`.
+     */
+    public setNodeData(node: TNode, data: TData): void {
+        if (!this.nodes.has(node)) {
+            throw new NoSuchNodeGraphError(node);
+        }
+        this.nodes.set(node, data);
     }
 }

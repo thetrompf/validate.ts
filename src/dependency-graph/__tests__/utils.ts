@@ -1,5 +1,5 @@
-import { GraphCycleError, NoSuchEdgeGraphError } from 'dependency-graph/errors';
-import { createDfs } from 'dependency-graph/utils';
+import { GraphCycleError, NoSuchEdgeGraphError } from '../errors';
+import { createDfs } from '../utils';
 
 test('create dfs returns a function', () => {
     const dfs = createDfs<string>(new Map(), false, new Set());
