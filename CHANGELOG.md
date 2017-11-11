@@ -1,3 +1,11 @@
+## 2.0.7 (November 11, 2017)
+* Don't pack unncessary files
+
+## 2.0.6 (November 11, 2017)
+* Updated all dependencies.
+* Modernized the code and the types.
+* Fix the tests and code to conform with the new typescript and jest versions.
+
 ## 2.0.5 (August 21, 2017)
 * Hopefully types are properly generated and distributed.
 * Keep all dependencies fully up-to-date.
