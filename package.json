@@ -16,7 +16,7 @@
         "uglify-js": "^3.1.8"
     },
     "license": "BSD-3-Clause",
-    "main": "lib/validate.js",
+    "main": "lib/index.js",
     "module": "lib2015/validate.js",
     "name": "validate.ts",
     "repository": "https://git.input-output.dk/bkc/validate.ts",
@@ -49,6 +49,6 @@
         "serve:examples": "yarn build:dist-amd && serve --ignore='.vscode/,coverage/,dist/system/,node_modules/,src/,.eslintrc.json,.gitignore,.gitlab-ci.yml,.npmignore,CHANGELOG.md,LICENSE,README.md,npm-shrinkwrap.json,package.json,tsconfig.dist.amd.json,tsconfig.dist.system.json,tsconfig.json,tsconfig.lib.commonjs.json,tsconfig.lib.es2015.json,tsconfig.test.json,tslint.json,yarn.lock'",
         "test": "jest"
     },
-    "types": "types/validate.d.ts",
-    "version": "2.0.7"
+    "types": "types/index.d.ts",
+    "version": "2.1.0"
 }
