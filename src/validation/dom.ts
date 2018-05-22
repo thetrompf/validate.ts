@@ -5,7 +5,6 @@ export type HTMLFormValueElement =
     | HTMLButtonElement
     | HTMLInputElement
     | HTMLOptionElement
-    | HTMLOptGroupElement
     | HTMLSelectElement
     | HTMLTextAreaElement;
 
@@ -137,7 +136,7 @@ export function createValueProvider(editor: HTMLFormValueElement): ValueProvider
             args.unshift(event === 'change' ? 'input' : event);
             editor.addEventListener.call(editor, ...args);
         },
-        getValue: (): any => {
+        getValue: (): string => {
             return editor.value;
         },
         removeListener: (event: string, ...args: any[]) => {

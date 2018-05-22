@@ -6,7 +6,6 @@ module.exports = {
             tsConfigFile: 'tsconfig.test.json',
         },
     },
-    mapCoverage: true,
     moduleFileExtensions: ['ts', 'js'],
     moduleDirectories: ['node_modules'],
     modulePaths: ['<rootDir>/src/'],
