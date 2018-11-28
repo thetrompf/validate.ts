@@ -1,3 +1,6 @@
+## 2.2.0 (November 28, 2018)
+* Upgrade all dependencies, got rid of security warnings from NPM.
+
 ## 2.0.7 (November 11, 2017)
 * Don't pack unncessary files
 
