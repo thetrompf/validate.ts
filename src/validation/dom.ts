@@ -1,12 +1,7 @@
 import { ValidationAggregateError, ValidationError } from './errors';
 import { Constraints, ILiveValidationChangeMap, ValueProvider } from './types';
 
-export type HTMLFormValueElement =
-    | HTMLButtonElement
-    | HTMLInputElement
-    | HTMLOptionElement
-    | HTMLSelectElement
-    | HTMLTextAreaElement;
+export type HTMLFormValueElement = HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 export interface WrapOptions {
     editorSelector: string;

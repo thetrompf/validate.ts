@@ -21,7 +21,7 @@ test('a required field filled out passes', async () => {
     expect(result).toBeUndefined();
 });
 
-test('a required field fails when it is null', async () => {
+test.only('a required field fails when it is null', async () => {
     expect.assertions(2);
     try {
         await validate(

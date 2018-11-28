@@ -1,18 +1,20 @@
 module.exports = {
-    collectCoverage: false,
-    coveragePathIgnorePatterns: ['/node_modules/', '/__tests__/.*\\.ts$'],
     globals: {
         'ts-jest': {
-            tsConfigFile: 'tsconfig.test.json',
+            tsConfig: 'tsconfig.test.json',
         },
     },
-    moduleFileExtensions: ['ts', 'js'],
     moduleDirectories: ['node_modules'],
-    modulePaths: ['<rootDir>/src/'],
-    modulePathIgnorePatterns: ['<rootDir>/build/', '<rootDir>/dist/', '<rootDir>/lib/', '<rootDir>/lib2015/'],
+    modulePathIgnorePatterns: [
+        '<rootDir>/build',
+        '<rootDir>/dist',
+        '<rootDir>/examples',
+        '<rootDir>/lib',
+        '<rootDir>/lib2015',
+        '<rootDir>/types',
+    ],
+    moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
+    preset: 'ts-jest',
     testEnvironment: 'node',
-    testRegex: '/__tests__/.*\\.ts$',
-    transform: {
-        '.(ts|tsx)': '<rootDir>/node_modules/ts-jest/preprocessor.js',
-    },
+    testPathIgnorePatterns: ['/node_modules/', '/__helpers__/'],
 };

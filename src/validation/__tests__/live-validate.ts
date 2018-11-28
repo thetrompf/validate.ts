@@ -1,7 +1,7 @@
 import { Field, FieldAsync } from '../__mocks__/live-fields';
 import { ValidationError } from '../errors';
 import { liveValidate } from '../live-validate';
-import { LiveValidationChangeMap as ILiveValidationChangeMap } from '../types';
+import { ILiveValidationChangeMap } from '../types';
 import { LiveValidationChangeMap } from '../utils';
 
 test('live validators are called when field emits change', async () => {
@@ -19,7 +19,7 @@ test('live validators are called when field emits change', async () => {
         {
             field1: {
                 validators: [
-                    async (value: any, dependencies: any): Promise<void> => {
+                    async (value: any, _dependencies: any): Promise<void> => {
                         expect(value).toEqual('value2');
                     },
                 ],
@@ -389,12 +389,12 @@ test('validators beyond 2nd level of dependency breaks the dependency chain', as
     expect(cValidator).toHaveBeenCalledWith('C', new Map([['b', 'B']]), {});
     expect(dValidator).not.toHaveBeenCalled();
 
-    const liveValidationChangeMap = new LiveValidationChangeMap<typeof values>();
-    liveValidationChangeMap.markNodeAsChanged('a');
-    liveValidationChangeMap.markNodeAsChanged('b');
-    liveValidationChangeMap.addError('c', new ValidationError('break'));
+    const changeMap = new LiveValidationChangeMap<typeof values>();
+    changeMap.markNodeAsChanged('a');
+    changeMap.markNodeAsChanged('b');
+    changeMap.addError('c', new ValidationError('break'));
 
-    expect(changeHandler).toHaveBeenCalledWith(liveValidationChangeMap);
+    expect(changeHandler).toHaveBeenCalledWith(changeMap);
 });
 
 test('dependant validators is run even if no validators defined on first level in the graph', async () => {

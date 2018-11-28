@@ -7,14 +7,9 @@
         "moduleResolution": "node",
         "noEmitHelpers": true,
         "noImplicitAny": true,
-        "outDir": "build",
         "strict": true,
         "target": "es2015",
-        "lib": [
-            "es2015"
-        ]
+        "lib": ["es2015"]
     },
-    "exclude": [
-        "node_modules"
-    ]
+    "exclude": ["node_modules"]
 }

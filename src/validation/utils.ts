@@ -57,7 +57,7 @@ export async function getPromisedDependencyMap<T>(
     const promises: Promise<any>[] = [];
 
     for (const key of Array.from(dependencies.values())) {
-        const value = values[key];
+        const value = values[key as keyof typeof values];
         if (value != null) {
             if ((value as any) instanceof Promise) {
                 promises.push((value as Promise<keyof T>).then(v => map.set(key, v)));
@@ -82,12 +82,12 @@ export const VALIDATION_TIMEOUT = 2000;
  * Function that returns a promise that rejects
  * after the `VALIDATION_TIMEOUT` has exceeded.
  */
-export function validationTimeout(id?: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+export function validationTimeout(id?: string): Promise<never> {
+    return new Promise<void>((_, reject) => {
         setTimeout(() => {
             reject(new ValidationTimeoutError('Validation timeout' + (id == null ? '' : id)));
         }, VALIDATION_TIMEOUT);
-    });
+    }) as Promise<never>;
 }
 
 /**
@@ -189,4 +189,8 @@ Field changes with errors:`;
     public values() {
         return this.errors.values();
     }
+}
+
+export function promisify<T>(value: T | Promise<T>): Promise<T> {
+    return value instanceof Promise ? value : Promise.resolve(value);
 }

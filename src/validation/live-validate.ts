@@ -1,5 +1,5 @@
 import { Graph } from '../dependency-graph/graph';
-import { ValidationAggregateError, ValidationError } from './errors';
+import { ValidationError } from './errors';
 import {
     Constraints,
     ConstraintSpecification,
@@ -8,7 +8,6 @@ import {
     LiveValueChangeHandler,
     NodeValidationErrorHandler,
     SubscriptionCanceller,
-    ValidationErrorHandler,
     Validator,
     ValueProvider,
 } from './types';
@@ -122,7 +121,7 @@ async function validateNode<TValues extends FieldObservables>(
 
             // Race for the validation dependency values.
             return Promise.race([validationTimeout(), getPromisedDependencyMap(values, dependencyMap.get(node))]).then(
-                (dependencies: Map<keyof TValues, any> | void) => {
+                (dependencies: Map<keyof TValues, any>) => {
                     // This check has already been made,
                     // but in async context the type checker
                     // thinks it could have been mutated in the meantime.
@@ -137,9 +136,7 @@ async function validateNode<TValues extends FieldObservables>(
                             // race all the validation for timeout.
                             return Promise.race([
                                 dependantValidationTimeout,
-                                validate(value, dependencies as Map<keyof TValues, any>, {}).catch(
-                                    globalChangeCallback,
-                                ),
+                                validate(value, dependencies, {}).catch(globalChangeCallback),
                             ]);
                         }),
                     ).then(() => {

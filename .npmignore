@@ -5,6 +5,16 @@
 
 /src/**/__mocks__/
 /src/**/__tests__/
+*.log
+*.tgz
+
+.dockerignore
+.eslintrc.json
+.gitignore
+.gitlab-ci.yml
+.npmignore
+Dockerfile
+v8-compile-cache-0
 
 /.gitignore
 /.gitlab-ci.yml
