@@ -1,5 +1,5 @@
 import { ValidationAggregateError, ValidationError } from './errors';
-import { Constraints, ILiveValidationChangeMap, ValueProvider } from './types';
+import { ILiveValidationChangeMap, ValueProvider } from './types';
 
 export type HTMLFormValueElement = HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 

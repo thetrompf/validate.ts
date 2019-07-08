@@ -2,7 +2,7 @@ import { Graph } from '../dependency-graph/graph';
 import { ValidationAggregateError, ValidationError } from './errors';
 import { Constraints, ConstraintSpecification, FieldValuesObject, Validator } from './types';
 
-import { addAllConstraints, buildDependencyMap, getPromisedDependencyMap, validationTimeout, promisify } from './utils';
+import { addAllConstraints, buildDependencyMap, getPromisedDependencyMap, promisify, validationTimeout } from './utils';
 
 /**
  * Validate `values` against the `constraints` specification.
@@ -62,31 +62,29 @@ export async function validate<T extends FieldValuesObject>(values: T, constrain
                             return Promise.race([
                                 validationTimeout(),
                                 getPromisedDependencyMap<T>(values, dependencyMap.get(key)),
-                            ]).then(
-                                (dependencies: Map<keyof T, any> | void): any => {
-                                    // Run all validators, and race with the timeout.
-                                    if (constraint.validators == null) {
-                                        return;
-                                    }
+                            ]).then((dependencies: Map<keyof T, any> | void): any => {
+                                // Run all validators, and race with the timeout.
+                                if (constraint.validators == null) {
+                                    return;
+                                }
 
-                                    // Create a single validation timeout promise per key
-                                    // to share for all validations on a single key.
-                                    const keyValidationTimeout = validationTimeout();
+                                // Create a single validation timeout promise per key
+                                // to share for all validations on a single key.
+                                const keyValidationTimeout = validationTimeout();
 
-                                    // Run all validators and resolve when all validators are completed.
-                                    return Promise.all(
-                                        constraint.validators.map((validator: Validator<T>) => {
-                                            return Promise.race([
-                                                keyValidationTimeout,
-                                                validator(val, dependencies as Map<keyof T, any>, {})
-                                                    // Handle the validation error up front
-                                                    // and add it to the aggregated error.
-                                                    .catch(keyValidationErrorsHandler),
-                                            ]);
-                                        }),
-                                    );
-                                },
-                            );
+                                // Run all validators and resolve when all validators are completed.
+                                return Promise.all(
+                                    constraint.validators.map((validator: Validator<T>) => {
+                                        return Promise.race([
+                                            keyValidationTimeout,
+                                            validator(val, dependencies as Map<keyof T, any>, {})
+                                                // Handle the validation error up front
+                                                // and add it to the aggregated error.
+                                                .catch(keyValidationErrorsHandler),
+                                        ]);
+                                    }),
+                                );
+                            });
                         }
 
                         // Setup error handling to pick up

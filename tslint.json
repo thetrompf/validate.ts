@@ -2,6 +2,7 @@
     "extends": "tslint-secoya",
     "rules": {
         "no-relative-imports": false,
-        "indent": [true, "spaces"]
+        "indent": [true, "spaces"],
+        "variable-name": [true, "allow-leading-underscore"]
     }
 }

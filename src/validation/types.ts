@@ -32,8 +32,8 @@ export interface ConstraintSpecification<T> {
  * A map of constraints to hold up against `TValues`.
  */
 export type Constraints<TValues> = {
-    [// tslint:disable-next-line:semicolon
-    P in keyof TValues]?: ConstraintSpecification<TValues>
+    // tslint:disable-next-line:semicolon
+    [P in keyof TValues]?: ConstraintSpecification<TValues>;
 };
 
 /**

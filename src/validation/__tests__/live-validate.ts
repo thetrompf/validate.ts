@@ -555,13 +555,13 @@ test('when field triggers change, if a later change triggers, and returns first,
     const aValidator = jest.fn();
     aValidator
         .mockReturnValueOnce(
-            new Promise((resolve, reject) => {
-                setTimeout(reject, 30);
+            new Promise((_resolve, reject) => {
+                setTimeout(() => reject(), 30);
             }),
         )
         .mockReturnValueOnce(
-            new Promise((resolve, reject) => {
-                setTimeout(resolve, 10);
+            new Promise(resolve => {
+                setTimeout(() => resolve(), 10);
             }),
         );
 
@@ -606,8 +606,8 @@ test('when subscriptions are cancelled and a long running validation returns, th
     const changeHandler = jest.fn();
 
     aValidator.mockReturnValue(
-        new Promise((resolve, reject) => {
-            setTimeout(resolve, 30);
+        new Promise(resolve => {
+            setTimeout(() => resolve(), 30);
         }),
     );
 
@@ -645,8 +645,8 @@ test('validators in *next* level in dependecy graph is not called when subscript
     const changeHandler = jest.fn();
 
     aValidator.mockReturnValue(
-        new Promise((resolve, reject) => {
-            setTimeout(resolve, 30);
+        new Promise(resolve => {
+            setTimeout(() => resolve(), 30);
         }),
     );
     bValidator.mockReturnValue(Promise.resolve());
@@ -673,7 +673,7 @@ test('validators in *next* level in dependecy graph is not called when subscript
     a.setValue("A'");
     const changePromise = a.triggerChange();
 
-    setTimeout(cancelSubscriptions, 0);
+    setTimeout(() => cancelSubscriptions(), 0);
 
     await changePromise;
 

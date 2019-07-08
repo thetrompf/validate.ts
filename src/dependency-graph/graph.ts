@@ -163,15 +163,13 @@ export class Graph<TNode, TData> {
         keys.forEach(cycleDfs);
 
         const dfs = createDfs(this.outgoingEdges, leavesOnly, result);
-        keys
-            .filter(node => {
-                const ie = this.incomingEdges.get(node);
-                if (ie == null) {
-                    throw new GraphError('This should never happen');
-                }
-                return ie.size === 0;
-            })
-            .forEach(dfs);
+        keys.filter(node => {
+            const ie = this.incomingEdges.get(node);
+            if (ie == null) {
+                throw new GraphError('This should never happen');
+            }
+            return ie.size === 0;
+        }).forEach(dfs);
 
         return result;
     }

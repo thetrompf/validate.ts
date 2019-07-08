@@ -169,8 +169,8 @@ test('a validator that exceeds timeout throws', async () => {
                 field: {
                     validators: [
                         async (value: any) => {
-                            return new Promise<void>((resolve, reject) => {
-                                setTimeout(resolve, VALIDATION_TIMEOUT + 1000);
+                            return new Promise<void>(resolve => {
+                                setTimeout(() => resolve(), VALIDATION_TIMEOUT + 1000);
                             });
                         },
                     ],

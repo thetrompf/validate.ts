@@ -1,23 +1,24 @@
 {
     "author": "Brian Kejlberg <briankchristensen@gmail.com>",
     "dependencies": {
-        "tslib": "^1.9.3"
+        "tslib": "^1.10.0"
     },
     "devDependencies": {
-        "@types/jest": "^23.3.9",
-        "@types/node": "^10.12.10",
-        "eslint": "^5.9.0",
-        "eslint-config-airbnb": "^17.1.0",
-        "eslint-plugin-import": "^2.14.0",
-        "eslint-plugin-jsx-a11y": "^6.1.2",
-        "eslint-plugin-react": "^7.11.1",
-        "jest": "^23.6.0",
-        "prettier": "^1.15.2",
-        "serve": "^10.1.1",
-        "ts-jest": "^23.10.5",
-        "tslint": "^5.11.0",
-        "typescript": "^3.1.6",
-        "uglify-js": "^3.4.9"
+        "@types/jest": "^24.0.15",
+        "@types/node": "^12.0.12",
+        "eslint": "^6.0.1",
+        "eslint-config-airbnb": "^17.1.1",
+        "eslint-plugin-import": "^2.18.0",
+        "eslint-plugin-jsx-a11y": "^6.2.3",
+        "eslint-plugin-react": "^7.14.2",
+        "jest": "^24.8.0",
+        "prettier": "^1.18.2",
+        "serve": "^11.0.2",
+        "ts-jest": "^24.0.2",
+        "tslint": "^5.18.0",
+        "tslint-secoya": "^2.0.7",
+        "typescript": "^3.5.2",
+        "uglify-js": "^3.6.0"
     },
     "license": "BSD-3-Clause",
     "main": "lib/index.js",
@@ -49,7 +50,7 @@
         "coverage": "yarn clean:coverage && jest --coverage",
         "docker:build": "docker build -t bkc/validate.ts . && docker run --rm -itv .:/artifacts bkc/validate.ts",
         "fmt": "prettier --write --print-width 120 --tab-width 4 --single-quote --trailing-comma all --parser typescript 'src/**/*.ts'",
-        "lint": "tslint .",
+        "lint": "tslint --project .",
         "prepublishOnly": "test -n \"$NPM_TOKEN\" || (>&2 echo 'Only publishing through CI is supported' && exit 1)",
         "serve:examples": "yarn build:dist-amd && serve --ignore='.vscode/,coverage/,dist/system/,node_modules/,src/,.eslintrc.json,.gitignore,.gitlab-ci.yml,.npmignore,CHANGELOG.md,LICENSE,README.md,npm-shrinkwrap.json,package.json,tsconfig.dist.amd.json,tsconfig.dist.system.json,tsconfig.json,tsconfig.lib.commonjs.json,tsconfig.lib.es2015.json,tsconfig.test.json,tslint.json,yarn.lock'",
         "test": "jest"
