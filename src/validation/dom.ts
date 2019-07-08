@@ -129,14 +129,14 @@ export function createValueProvider(editor: HTMLFormValueElement): ValueProvider
     return {
         addListener: (event: string, ...args: any[]) => {
             args.unshift(event === 'change' ? 'input' : event);
-            editor.addEventListener.call(editor, ...args);
+            editor.addEventListener.apply(editor, args as any);
         },
         getValue: (): string => {
             return editor.value;
         },
         removeListener: (event: string, ...args: any[]) => {
             args.unshift(event === 'change' ? 'input' : event);
-            editor.removeEventListener.call(editor, ...args);
+            editor.removeEventListener.apply(editor, args as any);
         },
     };
 }

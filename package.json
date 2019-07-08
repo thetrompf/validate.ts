@@ -45,8 +45,8 @@
         "clean:lib": "yarn run clean:lib-commonjs && yarn run clean:lib-es2015",
         "clean:types": "rm -Rf types",
         "clean": "yarn clean:build && yarn clean:coverage && yarn clean:dist && yarn clean:lib && yarn clean:types",
-        "compress:dist-amd": "uglifyjs --compress warnings=false --mangle --screw-ie8 --acorn --output dist/amd/validate.min.js -- dist/amd/validate.js",
-        "compress:dist-system": "uglifyjs --compress warnings=false --mangle --screw-ie8 --acorn --output dist/system/validate.min.js -- dist/system/validate.js",
+        "compress:dist-amd": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/amd/validate.min.js -- dist/amd/validate.js",
+        "compress:dist-system": "uglifyjs --compress --mangle --screw-ie8 --acorn --output dist/system/validate.min.js -- dist/system/validate.js",
         "coverage": "yarn clean:coverage && jest --coverage",
         "docker:build": "docker build -t bkc/validate.ts . && docker run --rm -itv .:/artifacts bkc/validate.ts",
         "fmt": "prettier --write --print-width 120 --tab-width 4 --single-quote --trailing-comma all --parser typescript 'src/**/*.ts'",
@@ -56,5 +56,5 @@
         "test": "jest"
     },
     "types": "types/index.d.ts",
-    "version": "2.2.0"
+    "version": "2.3.0"
 }
